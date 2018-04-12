@@ -674,6 +674,19 @@ The following pages may shed some light:
 - uhd::stream_args_t
 - \ref multiple_channumbers
 
+\subsection x3x0_misc_colosseum Colosseum ADC/DAC settings
+
+This fork accepts `colosseum=1` in the device arguments to select the
+Colosseum converter settings: fixed 6 dB ADC gain and reduced DAC full-scale
+current. Fixed ADC gain is excluded from the reported RF gain. Omit the
+argument, or set `colosseum=0`, to retain the upstream converter settings and
+the adjustable ADC gain stage, initialized to 0 dB.
+
+This device argument configures the converters only. Applications select LO
+offsets through `uhd::tune_request_t`. DragonRadio's `colosseum` configuration
+parameter adds this device argument. Its independent `offset_tuning`
+parameter selects bandwidth-dependent LO offsets in the application.
+
 \subsection x3x0_misc_multirx Multiple RX channels
 
 There are two complete DDC and DUC DSP chains in the FPGA. In the single channel case,

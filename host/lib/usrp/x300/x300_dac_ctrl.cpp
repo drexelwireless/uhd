@@ -44,8 +44,17 @@ x300_dac_ctrl::~x300_dac_ctrl(void){
 class x300_dac_ctrl_impl : public x300_dac_ctrl
 {
 public:
-    x300_dac_ctrl_impl(uhd::spi_iface::sptr iface, const size_t slaveno, const double refclk):
-        _iface(iface), _slaveno(slaveno), _refclk(refclk)
+    /**
+     * \brief Initialize the DAC with the selected full-scale current.
+     * \param iface the SPI interface
+     * \param slaveno the SPI slave device number
+     * \param refclk the reference clock rate in Hz
+     * \param colosseum enable the reduced Colosseum full-scale current
+     */
+    x300_dac_ctrl_impl(uhd::spi_iface::sptr iface, const size_t slaveno,
+        const double refclk, const bool colosseum):
+        _iface(iface), _slaveno(slaveno), _refclk(refclk),
+        _fullscale(colosseum ? 0x00 : 0x01)
     {
         //Power up all DAC subsystems
         write_ad9146_reg(0x01, 0x10); //Up: I DAC, Q DAC, Receiver, Voltage Ref, Clocks
@@ -248,12 +257,15 @@ public:
         }
     }
 
+    /**
+     * \brief Set sleep mode while preserving the selected full-scale current.
+     * \param sleep whether to put both DACs into sleep mode
+     */
     void _sleep_mode(bool sleep)
     {
         boost::uint8_t sleep_val = sleep ? (1<<7) : 0x00;
-        //Set sleep word and default fullscale value
-        write_ad9146_reg(0x41, sleep_val | 0x01);    //I DAC
-        write_ad9146_reg(0x45, sleep_val | 0x01);    //Q DAC
+        write_ad9146_reg(0x41, sleep_val | _fullscale);    //I DAC
+        write_ad9146_reg(0x45, sleep_val | _fullscale);    //Q DAC
     }
 
     void _soft_reset()
@@ -266,12 +278,15 @@ private:
     uhd::spi_iface::sptr _iface;
     const size_t _slaveno;
     const double _refclk;
+    /** \brief High bits of the I/Q DAC full-scale current adjustment. */
+    const boost::uint8_t _fullscale;
 };
 
 /***********************************************************************
  * Public make function for the DAC control
  **********************************************************************/
-x300_dac_ctrl::sptr x300_dac_ctrl::make(uhd::spi_iface::sptr iface, const size_t slaveno, const double clock_rate)
+x300_dac_ctrl::sptr x300_dac_ctrl::make(uhd::spi_iface::sptr iface,
+    const size_t slaveno, const double clock_rate, const bool colosseum)
 {
-    return sptr(new x300_dac_ctrl_impl(iface, slaveno, clock_rate));
+    return sptr(new x300_dac_ctrl_impl(iface, slaveno, clock_rate, colosseum));
 }

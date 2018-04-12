@@ -77,6 +77,11 @@ IF(ENABLE_X300)
         ${CMAKE_BINARY_DIR}/lib/ic_reg_maps)
     TARGET_LINK_LIBRARIES(x300_adc_ctrl_test uhd ${Boost_LIBRARIES})
     UHD_ADD_TEST(x300_adc_ctrl_test x300_adc_ctrl_test)
+
+    ADD_EXECUTABLE(x300_dac_ctrl_test x300_dac_ctrl_test.cpp
+        ../lib/usrp/x300/x300_dac_ctrl.cpp)
+    TARGET_LINK_LIBRARIES(x300_dac_ctrl_test uhd ${Boost_LIBRARIES})
+    UHD_ADD_TEST(x300_dac_ctrl_test x300_dac_ctrl_test)
 ENDIF(ENABLE_X300)
 
 ########################################################################

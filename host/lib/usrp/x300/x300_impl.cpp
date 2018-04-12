@@ -913,6 +913,7 @@ x300_impl::~x300_impl(void)
 
 void x300_impl::setup_radio(const size_t mb_i, const std::string &slot_name, const uhd::device_addr_t &dev_addr)
 {
+    const bool colosseum = dev_addr.cast<bool>("colosseum", false);
     const fs_path mb_path = "/mboards/"+boost::lexical_cast<std::string>(mb_i);
     UHD_ASSERT_THROW(mb_i < _mb.size());
     mboard_members_t &mb = _mb[mb_i];
@@ -950,7 +951,8 @@ void x300_impl::setup_radio(const size_t mb_i, const std::string &slot_name, con
     ////////////////////////////////////////////////////////////////
     perif.spi = spi_core_3000::make(perif.ctrl, radio::sr_addr(radio::SPI), radio::RB32_SPI);
     perif.adc = x300_adc_ctrl::make(perif.spi, DB_ADC_SEN);
-    perif.dac = x300_dac_ctrl::make(perif.spi, DB_DAC_SEN, mb.clock->get_master_clock_rate());
+    perif.dac = x300_dac_ctrl::make(perif.spi, DB_DAC_SEN,
+        mb.clock->get_master_clock_rate(), colosseum);
     perif.leds = gpio_core_200_32wo::make(perif.ctrl, radio::sr_addr(radio::LEDS));
     perif.rx_fe = rx_frontend_core_200::make(perif.ctrl, radio::sr_addr(radio::RX_FRONT));
     perif.rx_fe->set_dc_offset(rx_frontend_core_200::DEFAULT_DC_OFFSET_VALUE);
@@ -988,9 +990,15 @@ void x300_impl::setup_radio(const size_t mb_i, const std::string &slot_name, con
     _tree->create<std::string>(mb_path / "rx_codecs" / slot_name / "name").set("ads62p48");
     _tree->create<std::string>(mb_path / "tx_codecs" / slot_name / "name").set("ad9146");
 
-    _tree->create<meta_range_t>(mb_path / "rx_codecs" / slot_name / "gains" / "digital" / "range").set(meta_range_t(0, 6.0, 0.5));
-    _tree->create<double>(mb_path / "rx_codecs" / slot_name / "gains" / "digital" / "value")
-        .subscribe(std::bind(&x300_adc_ctrl::set_gain, perif.adc, std::placeholders::_1)).set(0);
+    if (colosseum) {
+        // Preserve the Colosseum gain convention: ADC gain is fixed and is
+        // excluded from the reported RF gain.
+        perif.adc->set_gain(6.0);
+    } else {
+        _tree->create<meta_range_t>(mb_path / "rx_codecs" / slot_name / "gains" / "digital" / "range").set(meta_range_t(0, 6.0, 0.5));
+        _tree->create<double>(mb_path / "rx_codecs" / slot_name / "gains" / "digital" / "value")
+            .subscribe(std::bind(&x300_adc_ctrl::set_gain, perif.adc, std::placeholders::_1)).set(0);
+    }
 
     ////////////////////////////////////////////////////////////////////
     // front end corrections

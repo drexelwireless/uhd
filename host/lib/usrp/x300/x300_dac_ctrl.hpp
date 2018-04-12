@@ -32,10 +32,13 @@ public:
     /*!
      * Make a codec control for the DAC.
      * \param iface a pointer to the interface object
-     * \param spiface the interface to spi
+     * \param slaveno the SPI slave device number
+     * \param clock_rate the reference clock rate in Hz
+     * \param colosseum enable the reduced Colosseum DAC full-scale current
      * \return a new codec control object
      */
-    static sptr make(uhd::spi_iface::sptr iface, const size_t slaveno, const double clock_rate);
+    static sptr make(uhd::spi_iface::sptr iface, const size_t slaveno,
+        const double clock_rate, const bool colosseum = false);
 
     // ! Reset the DAC
     virtual void reset(void) = 0;
