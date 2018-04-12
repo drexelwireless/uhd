@@ -986,9 +986,11 @@ void x300_impl::setup_radio(const size_t mb_i, const std::string &slot_name, con
     _tree->create<std::string>(mb_path / "rx_codecs" / slot_name / "name").set("ads62p48");
     _tree->create<std::string>(mb_path / "tx_codecs" / slot_name / "name").set("ad9146");
 
-    _tree->create<meta_range_t>(mb_path / "rx_codecs" / slot_name / "gains" / "digital" / "range").set(meta_range_t(0, 6.0, 0.5));
-    _tree->create<double>(mb_path / "rx_codecs" / slot_name / "gains" / "digital" / "value")
-        .subscribe(boost::bind(&x300_adc_ctrl::set_gain, perif.adc, _1)).set(0);
+    // Lock the ADC gain to 6dB.
+    //_tree->create<meta_range_t>(mb_path / "rx_codecs" / slot_name / "gains" / "digital" / "range").set(meta_range_t(0, 6.0, 0.5));
+    //_tree->create<double>(mb_path / "rx_codecs" / slot_name / "gains" / "digital" / "value")
+    //    .subscribe(boost::bind(&x300_adc_ctrl::set_gain, perif.adc, _1)).set(0);
+    perif.adc->set_gain(6.0);
 
     ////////////////////////////////////////////////////////////////////
     // front end corrections
