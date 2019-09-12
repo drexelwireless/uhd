@@ -147,11 +147,16 @@ UHD_RFNOC_RADIO_BLOCK_CONSTRUCTOR(x300_radio_ctrl)
     _tree->create<std::string>("rx_codecs" / _radio_slot / "name").set("ads62p48");
     _tree->create<std::string>("tx_codecs" / _radio_slot / "name").set("ad9146");
 
+#if 0
     _tree->create<meta_range_t>("rx_codecs" / _radio_slot / "gains" / "digital" / "range")
         .set(meta_range_t(0, 6.0, 0.5));
     _tree->create<double>("rx_codecs" / _radio_slot / "gains" / "digital" / "value")
         .add_coerced_subscriber(boost::bind(&x300_adc_ctrl::set_gain, _adc, _1))
         .set(0);
+#else
+    // Lock the ADC gain to 6dB.
+    _adc->set_gain(6.0);
+#endif
 
     ////////////////////////////////////////////////////////////////
     // create front-end objects

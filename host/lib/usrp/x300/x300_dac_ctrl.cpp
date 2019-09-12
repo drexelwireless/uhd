@@ -291,8 +291,8 @@ public:
     {
         uint8_t sleep_val = sleep ? (1 << 7) : 0x00;
         // Set sleep word and default fullscale value
-        write_ad9146_reg(0x41, sleep_val | 0x01); // I DAC
-        write_ad9146_reg(0x45, sleep_val | 0x01); // Q DAC
+        write_ad9146_reg(0x41, sleep_val | 0x00); // I DAC
+        write_ad9146_reg(0x45, sleep_val | 0x00); // Q DAC
     }
 
     void _soft_reset()
