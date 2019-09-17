@@ -56,11 +56,14 @@ namespace uhd{ namespace usrp{
 
     UHD_INLINE void standard_async_msg_prints(const async_metadata_t &metadata)
     {
+#if 0
         if (metadata.event_code &
             ( async_metadata_t::EVENT_CODE_UNDERFLOW
             | async_metadata_t::EVENT_CODE_UNDERFLOW_IN_PACKET)
         ) UHD_MSG(fastpath) << "U";
-        else if (metadata.event_code &
+        else
+#endif
+        if (metadata.event_code &
             ( async_metadata_t::EVENT_CODE_SEQ_ERROR
             | async_metadata_t::EVENT_CODE_SEQ_ERROR_IN_BURST)
         ) UHD_MSG(fastpath) << "S";
