@@ -133,7 +133,7 @@ static void e300_send_tunnel(
             if (not buff) continue;
 
             //step 2 - recv from socket
-            while (not wait_for_recv_ready(recver->native(), 100) and *running){}
+            while (not wait_for_recv_ready(recver->native_handle(), 100) and *running){}
             if (not *running) break;
             const size_t num_bytes = recver->receive_from(asio::buffer(buff->cast<void *>(), buff->size()), _rx_endpoint);
             if (E300_NETWORK_DEBUG) UHD_MSG(status) << name << " got " << num_bytes << std::endl;
@@ -494,7 +494,7 @@ void network_server_impl::_run_server(
         UHD_MSG(status) << "e300 run server on port " << port << " for " << what << std::endl;
         try
         {
-            //while (not wait_for_recv_ready(acceptor->native(), 100))
+            //while (not wait_for_recv_ready(acceptor->native_handle(), 100))
             //{
             //    if (boost::this_thread::interruption_requested()) return;
             //}
