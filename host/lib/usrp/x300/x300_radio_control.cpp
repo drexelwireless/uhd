@@ -1264,6 +1264,7 @@ private:
         get_tree()->create<int>("tx_codec/gains");
         get_tree()->create<std::string>("tx_codec/name").set("ad9146");
         get_tree()->create<std::string>("rx_codec/name").set("ads62p48");
+#if 0
         get_tree()
             ->create<meta_range_t>("rx_codec/gains/digital/range")
             .set(meta_range_t(0, 6.0, 0.5));
@@ -1271,6 +1272,10 @@ private:
             ->create<double>("rx_codec/gains/digital/value")
             .add_coerced_subscriber([this](const double gain) { _adc->set_gain(gain); })
             .set(0);
+#else
+    // Lock the ADC gain to 6dB.
+    _adc->set_gain(6.0);
+#endif
     }
 
     //! Calibrate delays on the ADC. This needs to happen before every session.
