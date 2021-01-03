@@ -83,7 +83,6 @@ IF(ENABLE_OCTOCLOCK)
 
     SET(octoclock_burner_sources
         octoclock_firmware_burner.cpp
-        ${CMAKE_SOURCE_DIR}/lib/utils/ihex.cpp
     )
 
     INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib/usrp_clock/octoclock)
