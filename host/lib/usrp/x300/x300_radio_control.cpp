@@ -1302,10 +1302,11 @@ private:
         get_tree()
             ->create<meta_range_t>("rx_codec/gains/digital/range")
             .set(meta_range_t(0, 6.0, 0.5));
+        // Lock the ADC gain to 6dB.
         get_tree()
             ->create<double>("rx_codec/gains/digital/value")
-            .add_coerced_subscriber([this](const double gain) { _adc->set_gain(gain); })
-            .set(0);
+            .add_coerced_subscriber([this](const double gain) { _adc->set_gain(6.0); })
+            .set(6.0);
     }
 
     //! Calibrate delays on the ADC. This needs to happen before every session.
