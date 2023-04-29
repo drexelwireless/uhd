@@ -175,17 +175,17 @@ namespace uhd {
 
         // Overloaded operators
 
-        sid_t operator = (boost::uint32_t new_sid) {
+        sid_t& operator = (boost::uint32_t new_sid) {
             set_sid(new_sid);
             return *this;
         }
 
-        sid_t operator = (sid_t &sid) {
+        sid_t& operator = (sid_t &sid) {
             set_sid(sid.get_sid());
             return *this;
         }
 
-        sid_t operator = (const std::string &sid_str) {
+        sid_t& operator = (const std::string &sid_str) {
             set_from_str(sid_str);
             return *this;
         }
