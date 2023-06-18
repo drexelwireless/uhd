@@ -24,11 +24,11 @@
 #include <boost/assign/list_of.hpp>
 #include <boost/program_options.hpp>
 #include <boost/foreach.hpp>
-#include <boost/bind.hpp>
 #include <boost/format.hpp>
 #include <cstdlib>
 #include <ctime>
 #include <complex>
+#include <functional>
 #include <iostream>
 
 namespace po = boost::program_options;

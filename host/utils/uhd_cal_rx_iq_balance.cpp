@@ -151,7 +151,7 @@ int UHD_SAFE_MAIN(int argc, char *argv[])
 
     //create a transmitter thread
     boost::thread_group threads;
-    threads.create_thread(boost::bind(&tx_thread, usrp, tx_wave_ampl));
+    threads.create_thread(std::bind(&tx_thread, usrp, tx_wave_ampl));
 
     //re-usable buffer for samples
     std::vector<samp_type> buff;

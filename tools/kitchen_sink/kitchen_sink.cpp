@@ -1671,7 +1671,7 @@ int UHD_SAFE_MAIN(int argc, char *argv[]){
                 rx_params.ignore_timeout = ignore_timeout;
                 rx_params.ignore_unexpected_error = ignore_unexpected_error;
 
-                thread_group.create_thread(boost::bind(
+                thread_group.create_thread(std::bind(
                     &benchmark_rx_rate,
                     usrp,
                     rx_cpu,
@@ -1771,7 +1771,7 @@ int UHD_SAFE_MAIN(int argc, char *argv[]){
                 tx_params.tx_freq_delay = tx_freq_delay;
                 tx_params.tx_lo_offset = tx_lo_offset;
 
-                thread_group.create_thread(boost::bind(&benchmark_tx_rate,
+                thread_group.create_thread(std::bind(&benchmark_tx_rate,
                     usrp,
                     tx_cpu,
                     tx_stream,
@@ -1779,7 +1779,7 @@ int UHD_SAFE_MAIN(int argc, char *argv[]){
 
                 if (enable_async)
                 {
-                    thread_group.create_thread(boost::bind(&benchmark_tx_rate_async_helper,
+                    thread_group.create_thread(std::bind(&benchmark_tx_rate_async_helper,
                         tx_stream,
                         tx_async_timeout));
                 }
@@ -1788,7 +1788,7 @@ int UHD_SAFE_MAIN(int argc, char *argv[]){
             running = true;
             std::cout << HEADER "Begin..." << std::endl;
 
-            thread_group.create_thread(boost::bind(&check_thread, usrp));
+            thread_group.create_thread(std::bind(&check_thread, usrp));
 
             if (tx_channel_nums.size() > 0)
                 tx_thread_begin.wait(l_tx);
