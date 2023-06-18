@@ -31,11 +31,11 @@
 #include <boost/asio.hpp> //used for htonl and ntohl
 #include <boost/assign/list_of.hpp>
 #include <boost/format.hpp>
-#include <boost/bind.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/functional/hash.hpp>
 #include <boost/filesystem.hpp>
 #include <algorithm>
+#include <functional>
 #include <iostream>
 #include <uhd/utils/platform.hpp>
 
@@ -98,7 +98,7 @@ public:
     void lock_device(bool lock){
         if (lock){
             this->pokefw(U2_FW_REG_LOCK_GPID, get_process_hash());
-            _lock_task = task::make(boost::bind(&usrp2_iface_impl::lock_task, this));
+            _lock_task = task::make(std::bind(&usrp2_iface_impl::lock_task, this));
         }
         else{
             _lock_task.reset(); //shutdown the task
@@ -428,4 +428,3 @@ private:
 usrp2_iface::sptr usrp2_iface::make(udp_simple::sptr ctrl_transport){
     return usrp2_iface::sptr(new usrp2_iface_impl(ctrl_transport));
 }
-

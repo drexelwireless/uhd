@@ -23,11 +23,11 @@
 #include "../../transport/super_send_packet_handler.hpp"
 #include "async_packet_handler.hpp"
 #include <uhd/transport/bounded_buffer.hpp>
-#include <boost/bind.hpp>
 #include <uhd/utils/tasks.hpp>
 #include <uhd/utils/log.hpp>
 #include <boost/foreach.hpp>
 #include <boost/make_shared.hpp>
+#include <functional>
 
 using namespace uhd;
 using namespace uhd::usrp;
@@ -493,20 +493,20 @@ rx_streamer::sptr e300_impl::get_rx_stream(const uhd::stream_args_t &args_)
         perif.framer->configure_flow_control(fc_window);
         boost::shared_ptr<e300_rx_fc_cache_t> fc_cache(new e300_rx_fc_cache_t());
 
-        my_streamer->set_xport_chan_get_buff(stream_i, boost::bind(
-            &zero_copy_if::get_recv_buff, data_xports.recv, _1
+        my_streamer->set_xport_chan_get_buff(stream_i, std::bind(
+            &zero_copy_if::get_recv_buff, data_xports.recv, std::placeholders::_1
         ), true /*flush*/);
         my_streamer->set_overflow_handler(stream_i,
-            boost::bind(&e300_impl::_handle_overflow, this, boost::ref(perif),
+            std::bind(&e300_impl::_handle_overflow, this, boost::ref(perif),
             boost::weak_ptr<uhd::rx_streamer>(my_streamer))
         );
 
         my_streamer->set_xport_handle_flowctrl(stream_i,
-            boost::bind(&handle_rx_flowctrl, data_sid, data_xports.send, fc_cache, _1),
+            std::bind(&handle_rx_flowctrl, data_sid, data_xports.send, fc_cache, std::placeholders::_1),
             fc_handle_window, true/*init*/);
 
         my_streamer->set_issue_stream_cmd(stream_i,
-            boost::bind(&rx_vita_core_3000::issue_stream_command, perif.framer, _1)
+            std::bind(&rx_vita_core_3000::issue_stream_command, perif.framer, std::placeholders::_1)
         );
         perif.rx_streamer = my_streamer; //store weak pointer
 
@@ -605,19 +605,19 @@ tx_streamer::sptr e300_impl::get_tx_stream(const uhd::stream_args_t &args_)
         fc_cache->async_queue = async_md;
         fc_cache->old_async_queue = _async_md;
 
-        tick_rate_retriever_t get_tick_rate_fn = boost::bind(&e300_impl::_get_tick_rate, this);
+        tick_rate_retriever_t get_tick_rate_fn = std::bind(&e300_impl::_get_tick_rate, this);
 
-        task::sptr task = task::make(boost::bind(&handle_tx_async_msgs,
+        task::sptr task = task::make(std::bind(&handle_tx_async_msgs,
                                                  fc_cache, data_xports.recv,
                                                  get_tick_rate_fn));
 
         my_streamer->set_xport_chan_get_buff(
             stream_i,
-            boost::bind(&get_tx_buff_with_flowctrl, task, fc_cache, data_xports.send, fc_window, _1)
+            std::bind(&get_tx_buff_with_flowctrl, task, fc_cache, data_xports.send, fc_window, std::placeholders::_1)
         );
 
         my_streamer->set_async_receiver(
-            boost::bind(&async_md_type::pop_with_timed_wait, async_md, _1, _2)
+            std::bind(&async_md_type::pop_with_timed_wait, async_md, std::placeholders::_1, std::placeholders::_2)
         );
         my_streamer->set_xport_chan_sid(stream_i, true, data_sid);
         my_streamer->set_enable_trailer(false); //TODO not implemented trailer support yet
