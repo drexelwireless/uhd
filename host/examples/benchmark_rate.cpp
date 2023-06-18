@@ -29,6 +29,12 @@
 #include <complex>
 #include <cstdlib>
 
+#if defined(__GNUC__) && __GNUC__ >= 7
+#    define UHD_FALLTHROUGH __attribute__((fallthrough));
+#else
+#    define UHD_FALLTHROUGH
+#endif
+
 namespace po = boost::program_options;
 
 const double CLOCK_TIMEOUT = 1000;  // 1000mS timeout for external clock locking
@@ -147,6 +153,7 @@ void benchmark_rx_rate(
             break;
 
             // Otherwise, it's an error
+            UHD_FALLTHROUGH
         default:
             std::cerr << "Receiver error: " << md.strerror() << std::endl;
             std::cerr << "Unexpected error on recv, continuing..." << std::endl;
