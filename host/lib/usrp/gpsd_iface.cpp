@@ -16,11 +16,11 @@
 //
 
 #include <cmath>
+#include <functional>
 
 #include <gps.h>
 
 #include <boost/assign/list_of.hpp>
-#include <boost/bind.hpp>
 #include <boost/cstdint.hpp>
 #include "boost/date_time/gregorian/gregorian.hpp"
 #include <boost/format.hpp>
@@ -61,7 +61,7 @@ public:
         gps_stream(&_gps_data, WATCH_ENABLE, NULL);
 
         // create background thread talking to gpsd
-        boost::thread t(boost::bind(&gpsd_iface_impl::_thread_fcn ,this));
+        boost::thread t(std::bind(&gpsd_iface_impl::_thread_fcn ,this));
         _bthread.swap(t);
 
 
@@ -127,7 +127,11 @@ private: // member functions
                 _timeout_cnt = 0;
                 _detected = true;
 
+#if GPSD_API_MAJOR_VERSION < 7
                 if (gps_read(&_gps_data) < 0)
+#else
+                if (gps_read(&_gps_data, NULL, 0) < 0)
+#endif
                     throw std::runtime_error("error while reading");
             }
         }
