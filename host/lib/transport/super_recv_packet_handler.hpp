@@ -33,9 +33,9 @@
 #include <boost/foreach.hpp>
 #include <boost/function.hpp>
 #include <boost/format.hpp>
-#include <boost/bind.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/thread/barrier.hpp>
+#include <functional>
 #include <iostream>
 #include <vector>
 
@@ -106,7 +106,7 @@ public:
         _task_barrier.resize(size);
         _task_handlers.resize(size);
         for (size_t i = 1/*skip 0*/; i < size; i++){
-            _task_handlers[i] = task::make(boost::bind(&recv_packet_handler::converter_thread_task, this, i));
+            _task_handlers[i] = task::make(std::bind(&recv_packet_handler::converter_thread_task, this, i));
         };
     }
 

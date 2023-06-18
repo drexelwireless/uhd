@@ -29,8 +29,8 @@ using namespace boost::assign;
 sbx_xcvr::cbx::cbx(sbx_xcvr *_self_sbx_xcvr) {
     //register the handle to our base CBX class
     self_base = _self_sbx_xcvr;
-    _txlo = max287x_iface::make<max2870>(boost::bind(&sbx_xcvr::cbx::write_lo_regs, this, dboard_iface::UNIT_TX, _1));
-    _rxlo = max287x_iface::make<max2870>(boost::bind(&sbx_xcvr::cbx::write_lo_regs, this, dboard_iface::UNIT_RX, _1));
+    _txlo = max287x_iface::make<max2870>(std::bind(&sbx_xcvr::cbx::write_lo_regs, this, dboard_iface::UNIT_TX, std::placeholders::_1));
+    _rxlo = max287x_iface::make<max2870>(std::bind(&sbx_xcvr::cbx::write_lo_regs, this, dboard_iface::UNIT_RX, std::placeholders::_1));
 }
 
 
@@ -85,4 +85,3 @@ double sbx_xcvr::cbx::set_lo_freq(dboard_iface::unit_t unit, double target_freq)
     }
     return actual_freq;
 }
-

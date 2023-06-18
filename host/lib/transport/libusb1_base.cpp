@@ -25,8 +25,8 @@
 #include <boost/weak_ptr.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/foreach.hpp>
-#include <boost/bind.hpp>
 #include <cstdlib>
+#include <functional>
 #include <iostream>
 
 using namespace uhd;
@@ -44,7 +44,7 @@ public:
     libusb_session_impl(void){
         UHD_ASSERT_THROW(libusb_init(&_context) == 0);
         libusb_set_debug(_context, debug_level);
-        task_handler = task::make(boost::bind(&libusb_session_impl::libusb_event_handler_task, this, _context));
+        task_handler = task::make(std::bind(&libusb_session_impl::libusb_event_handler_task, this, _context));
     }
 
     ~libusb_session_impl(void){

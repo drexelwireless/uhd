@@ -396,7 +396,7 @@ int UHD_SAFE_MAIN(int argc, char *argv[]){
         uhd::stream_args_t stream_args(rx_cpu, rx_otw);
         stream_args.channels = channel_nums;
         uhd::rx_streamer::sptr rx_stream = usrp->get_rx_stream(stream_args);
-        thread_group.create_thread(boost::bind(&benchmark_rx_rate, usrp, rx_cpu, rx_stream, random_nsamps, boost::ref(burst_timer_elapsed)));
+        thread_group.create_thread(std::bind(&benchmark_rx_rate, usrp, rx_cpu, rx_stream, random_nsamps, boost::ref(burst_timer_elapsed)));
     }
 
     //spawn the transmit test thread
@@ -406,8 +406,8 @@ int UHD_SAFE_MAIN(int argc, char *argv[]){
         uhd::stream_args_t stream_args(tx_cpu, tx_otw);
         stream_args.channels = channel_nums;
         uhd::tx_streamer::sptr tx_stream = usrp->get_tx_stream(stream_args);
-        thread_group.create_thread(boost::bind(&benchmark_tx_rate, usrp, tx_cpu, tx_stream, boost::ref(burst_timer_elapsed), random_nsamps));
-        thread_group.create_thread(boost::bind(&benchmark_tx_rate_async_helper, tx_stream, boost::ref(burst_timer_elapsed)));
+        thread_group.create_thread(std::bind(&benchmark_tx_rate, usrp, tx_cpu, tx_stream, boost::ref(burst_timer_elapsed), random_nsamps));
+        thread_group.create_thread(std::bind(&benchmark_tx_rate_async_helper, tx_stream, boost::ref(burst_timer_elapsed)));
     }
 
     //sleep for the required duration

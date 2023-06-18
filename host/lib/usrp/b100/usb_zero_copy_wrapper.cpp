@@ -25,7 +25,7 @@
 #include <boost/make_shared.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition_variable.hpp>
-#include <boost/bind.hpp>
+#include <functional>
 #include <vector>
 #include <iostream>
 
@@ -86,7 +86,7 @@ public:
         _internal(internal), _fragmentation_size(fragmentation_size)
     {
         _ok_to_auto_flush = false;
-        _task = uhd::task::make(boost::bind(&usb_zero_copy_wrapper_msb::auto_flush, this));
+        _task = uhd::task::make(std::bind(&usb_zero_copy_wrapper_msb::auto_flush, this));
     }
 
     ~usb_zero_copy_wrapper_msb(void)

@@ -22,9 +22,9 @@
 #include "../../transport/super_send_packet_handler.hpp"
 #include "async_packet_handler.hpp"
 #include <uhd/utils/math.hpp>
-#include <boost/bind.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/math/common_factor.hpp>
+#include <functional>
 #include <set>
 
 using namespace uhd;
@@ -439,14 +439,14 @@ rx_streamer::sptr b200_impl::get_rx_stream(const uhd::stream_args_t &args_)
         perif.framer->setup(args);
         perif.ddc->setup(args);
         _demux->realloc_sid(sid);
-        my_streamer->set_xport_chan_get_buff(stream_i, boost::bind(
-            &recv_packet_demuxer_3000::get_recv_buff, _demux, sid, _1
+        my_streamer->set_xport_chan_get_buff(stream_i, std::bind(
+            &recv_packet_demuxer_3000::get_recv_buff, _demux, sid, std::placeholders::_1
         ), true /*flush*/);
-        my_streamer->set_overflow_handler(stream_i, boost::bind(
+        my_streamer->set_overflow_handler(stream_i, std::bind(
             &b200_impl::handle_overflow, this, radio_index
         ));
-        my_streamer->set_issue_stream_cmd(stream_i, boost::bind(
-            &rx_vita_core_3000::issue_stream_command, perif.framer, _1
+        my_streamer->set_issue_stream_cmd(stream_i, std::bind(
+            &rx_vita_core_3000::issue_stream_command, perif.framer, std::placeholders::_1
         ));
         perif.rx_streamer = my_streamer; //store weak pointer
 
@@ -544,11 +544,11 @@ tx_streamer::sptr b200_impl::get_tx_stream(const uhd::stream_args_t &args_)
         perif.deframer->setup(args);
         perif.duc->setup(args);
 
-        my_streamer->set_xport_chan_get_buff(stream_i, boost::bind(
-            &zero_copy_if::get_send_buff, _data_transport, _1
+        my_streamer->set_xport_chan_get_buff(stream_i, std::bind(
+            &zero_copy_if::get_send_buff, _data_transport, std::placeholders::_1
         ));
-        my_streamer->set_async_receiver(boost::bind(
-            &async_md_type::pop_with_timed_wait, _async_task_data->async_md, _1, _2
+        my_streamer->set_async_receiver(std::bind(
+            &async_md_type::pop_with_timed_wait, _async_task_data->async_md, std::placeholders::_1, std::placeholders::_2
         ));
         my_streamer->set_xport_chan_sid(stream_i, true, radio_index ? B200_TX_DATA1_SID : B200_TX_DATA0_SID);
         my_streamer->set_enable_trailer(false); //TODO not implemented trailer support yet

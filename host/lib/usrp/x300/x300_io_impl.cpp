@@ -24,11 +24,11 @@
 #include "async_packet_handler.hpp"
 #include <uhd/transport/bounded_buffer.hpp>
 #include <uhd/transport/chdr.hpp>
-#include <boost/bind.hpp>
 #include <uhd/utils/tasks.hpp>
 #include <uhd/utils/log.hpp>
 #include <boost/foreach.hpp>
 #include <boost/make_shared.hpp>
+#include <functional>
 
 using namespace uhd;
 using namespace uhd::usrp;
@@ -430,7 +430,7 @@ rx_streamer::sptr x300_impl::get_rx_stream(const uhd::stream_args_t &args_)
         //bind requires a zero_copy_if::sptr to add a streamer->xport lifetime dependency
         my_streamer->set_xport_chan_get_buff(
             stream_i,
-            boost::bind(&zero_copy_if::get_recv_buff, xport.recv, _1),
+            std::bind(&zero_copy_if::get_recv_buff, xport.recv, std::placeholders::_1),
             true /*flush*/
         );
         //Give the streamer a functor to handle overflows
@@ -438,19 +438,19 @@ rx_streamer::sptr x300_impl::get_rx_stream(const uhd::stream_args_t &args_)
         //Using "this" is OK because we know that x300_impl will outlive the streamer
         my_streamer->set_overflow_handler(
             stream_i,
-            boost::bind(&x300_impl::handle_overflow, this, boost::ref(perif), boost::weak_ptr<uhd::rx_streamer>(my_streamer))
+            std::bind(&x300_impl::handle_overflow, this, boost::ref(perif), boost::weak_ptr<uhd::rx_streamer>(my_streamer))
         );
         //Give the streamer a functor to send flow control messages
         //handle_rx_flowctrl is static and has no lifetime issues
         my_streamer->set_xport_handle_flowctrl(
-            stream_i, boost::bind(&handle_rx_flowctrl, data_sid, xport.send, mb.if_pkt_is_big_endian, seq32, _1),
+            stream_i, std::bind(&handle_rx_flowctrl, data_sid, xport.send, mb.if_pkt_is_big_endian, seq32, std::placeholders::_1),
             fc_handle_window,
             true/*init*/
         );
         //Give the streamer a functor issue stream cmd
         //bind requires a rx_vita_core_3000::sptr to add a streamer->framer lifetime dependency
         my_streamer->set_issue_stream_cmd(
-            stream_i, boost::bind(&rx_vita_core_3000::issue_stream_command, perif.framer, _1)
+            stream_i, std::bind(&rx_vita_core_3000::issue_stream_command, perif.framer, std::placeholders::_1)
         );
 
         //Store a weak pointer to prevent a streamer->x300_impl->streamer circular dependency
@@ -591,7 +591,7 @@ tx_streamer::sptr x300_impl::get_tx_stream(const uhd::stream_args_t &args_)
         guts->device_channel = chan;
         guts->async_queue = async_md;
         guts->old_async_queue = _async_md;
-        task::sptr task = task::make(boost::bind(&handle_tx_async_msgs, guts, xport.recv, mb.if_pkt_is_big_endian, mb.clock));
+        task::sptr task = task::make(std::bind(&handle_tx_async_msgs, guts, xport.recv, mb.if_pkt_is_big_endian, mb.clock));
 
         //Give the streamer a functor to get the send buffer
         //get_tx_buff_with_flowctrl is static so bind has no lifetime issues
@@ -599,11 +599,11 @@ tx_streamer::sptr x300_impl::get_tx_stream(const uhd::stream_args_t &args_)
         //task (sptr) is required to add  a streamer->async-handler lifetime dependency
         my_streamer->set_xport_chan_get_buff(
             stream_i,
-            boost::bind(&get_tx_buff_with_flowctrl, task, guts, xport.send, fc_window, _1)
+            std::bind(&get_tx_buff_with_flowctrl, task, guts, xport.send, fc_window, std::placeholders::_1)
         );
         //Give the streamer a functor handled received async messages
         my_streamer->set_async_receiver(
-            boost::bind(&async_md_type::pop_with_timed_wait, async_md, _1, _2)
+            std::bind(&async_md_type::pop_with_timed_wait, async_md, std::placeholders::_1, std::placeholders::_2)
         );
         my_streamer->set_xport_chan_sid(stream_i, true, data_sid);
         my_streamer->set_enable_trailer(false); //TODO not implemented trailer support yet

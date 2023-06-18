@@ -23,8 +23,8 @@
 #include <uhd/usrp/dboard_base.hpp>
 #include <uhd/usrp/dboard_manager.hpp>
 #include <boost/assign/list_of.hpp>
-#include <boost/bind.hpp>
 #include <boost/format.hpp>
+#include <functional>
 
 using namespace uhd;
 using namespace uhd::usrp;
