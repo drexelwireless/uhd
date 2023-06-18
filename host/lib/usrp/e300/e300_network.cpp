@@ -238,6 +238,7 @@ static void e300_codec_ctrl_tunnel(
                 break;
             case codec_xact_t::ACTION_SET_IQ_BALANCE_AUTO:
                 _codec_ctrl->set_iq_balance_auto(which_str, in->use_iq_correction == 1);
+                break;
             case codec_xact_t::ACTION_SET_AGC:
                 _codec_ctrl->set_agc(which_str, in->use_agc == 1);
                 break;
