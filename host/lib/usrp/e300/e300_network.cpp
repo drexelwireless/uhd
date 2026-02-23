@@ -484,12 +484,12 @@ void network_server_impl::_run_server(
     const std::string &what,
     const size_t fe)
 {
-    asio::io_service io_service;
-    asio::ip::udp::resolver resolver(io_service);
+    asio::io_context io_context;
+    asio::ip::udp::resolver resolver(io_context);
     asio::ip::udp::resolver::query query(asio::ip::udp::v4(), "0.0.0.0", port);
     asio::ip::udp::endpoint endpoint = *resolver.resolve(query);
 
-    //boost::shared_ptr<asio::ip::udp::acceptor> acceptor(new asio::ip::udp::acceptor(io_service, endpoint));
+    //boost::shared_ptr<asio::ip::udp::acceptor> acceptor(new asio::ip::udp::acceptor(io_context, endpoint));
     while (not boost::this_thread::interruption_requested())
     {
         UHD_MSG(status) << "e300 run server on port " << port << " for " << what << std::endl;
@@ -500,7 +500,7 @@ void network_server_impl::_run_server(
             //    if (boost::this_thread::interruption_requested()) return;
             //}
             boost::shared_ptr<asio::ip::udp::socket> socket;
-            socket.reset(new asio::ip::udp::socket(io_service, endpoint));
+            socket.reset(new asio::ip::udp::socket(io_context, endpoint));
             //acceptor->accept(*socket);
             UHD_MSG(status) << "e300 socket accept on port " << port << " for " << what << std::endl;
             //asio::ip::udp::no_delay option(true);
