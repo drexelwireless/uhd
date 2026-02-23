@@ -27,6 +27,11 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
 PROJECT(UHD CXX C)
 ENABLE_TESTING()
 
+# Handle removal of FindBoost module in cmake 3.30.
+if(POLICY CMP0167)
+    cmake_policy(SET CMP0167 NEW)
+endif()
+
 #make sure our local CMake Modules path comes first
 list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
