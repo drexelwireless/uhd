@@ -27,6 +27,11 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 PROJECT(UHD CXX C)
 ENABLE_TESTING()
 
+# Prefer new option behavior in cmake 3.13+
+if(POLICY CMP0077)
+    cmake_policy(SET CMP0077 NEW)
+endif()
+
 #make sure our local CMake Modules path comes first
 list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
