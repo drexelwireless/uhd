@@ -203,8 +203,8 @@ public:
         UHD_ASSERT_THROW(_num_send_frames <= WSA_MAXIMUM_WAIT_EVENTS);
 
         //resolve the address
-        asio::io_service io_service;
-        asio::ip::udp::resolver resolver(io_service);
+        asio::io_context io_context;
+        asio::ip::udp::resolver resolver(io_context);
         asio::ip::udp::resolver::query query(asio::ip::udp::v4(), addr, port);
         asio::ip::udp::endpoint receiver_endpoint = *resolver.resolve(query);
 
