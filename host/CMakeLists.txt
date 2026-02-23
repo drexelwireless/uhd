@@ -23,7 +23,7 @@
 ########################################################################
 # Project setup
 ########################################################################
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 PROJECT(UHD CXX C)
 ENABLE_TESTING()
 
