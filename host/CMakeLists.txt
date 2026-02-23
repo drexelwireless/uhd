@@ -27,6 +27,11 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 PROJECT(UHD CXX C)
 ENABLE_TESTING()
 
+# Handle removal of FindPythonInterp and FindPythonLibs modules in cmake 3.27
+if(POLICY CMP0148)
+    cmake_policy(SET CMP0148 OLD)
+endif()
+
 # Handle removal of FindBoost module in cmake 3.30.
 if(POLICY CMP0167)
     cmake_policy(SET CMP0167 NEW)
