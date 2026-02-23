@@ -32,6 +32,11 @@ if(POLICY CMP0077)
     cmake_policy(SET CMP0077 NEW)
 endif()
 
+# Handle removal of FindPythonInterp and FindPythonLibs modules in cmake 3.27
+if(POLICY CMP0148)
+    cmake_policy(SET CMP0148 OLD)
+endif()
+
 #make sure our local CMake Modules path comes first
 list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
