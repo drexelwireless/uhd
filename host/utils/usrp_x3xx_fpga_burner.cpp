@@ -264,10 +264,10 @@ void ethernet_burn(udp_simple::sptr udp_transport, std::string fpga_path, bool v
     boost::uint32_t max_size;
     std::vector<char> bitstream;
 
-    if(fs::extension(fpga_path) == ".bit") max_size = X300_FPGA_BIT_MAX_SIZE_BYTES;
+    if(fs::path(fpga_path).extension().string() == ".bit") max_size = X300_FPGA_BIT_MAX_SIZE_BYTES;
     else max_size = X300_FPGA_BIN_SIZE_BYTES; //Use for both .bin and .lvbitx
 
-    bool is_lvbitx = (fs::extension(fpga_path) == ".lvbitx");
+    bool is_lvbitx = (fs::path(fpga_path).extension().string() == ".lvbitx");
 
     size_t fpga_image_size;
     FILE* file;
@@ -539,7 +539,7 @@ int UHD_SAFE_MAIN(int argc, char *argv[]){
     /*
      * Check validity of image through extension
      */
-    std::string ext = fs::extension(fpga_path.c_str());
+    std::string ext = fs::path(fpga_path).extension().string();
     if(ext != ".bin" and ext != ".bit" and ext != ".lvbitx"){
         throw std::runtime_error("The image filename must end in .bin, .bit, or .lvbitx.");
     }
