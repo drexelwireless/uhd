@@ -16,7 +16,6 @@
 //
 
 #include <uhd/transport/nirio/rpc/rpc_client.hpp>
-#include <boost/version.hpp>
 #include <boost/format.hpp>
 #include <boost/asio/error.hpp>
 #include <boost/bind/bind.hpp>
@@ -48,29 +47,8 @@ rpc_client::rpc_client (
     try {
         //Synchronous resolve + connect
         tcp::resolver resolver(_io_context);
-        //Create flags object with all special flags disabled. Especially the following:
-        //- address_configured: Only return addresses if a non-loopback address is configured for the system.
-        //- numeric_host: No name resolution should be attempted for host
-        //- numeric_service: No name resolution should be attempted for service
-        tcp::resolver::query::flags query_flags(tcp::resolver::query::passive);
-        tcp::resolver::query query(tcp::v4(), server, port, query_flags);
-        tcp::resolver::iterator iterator = resolver.resolve(query);
-
-        #if BOOST_VERSION < 104700
-            // default constructor creates end iterator
-            tcp::resolver::iterator end;
-
-            boost::system::error_code error = boost::asio::error::host_not_found;
-            while (error && iterator != end)
-            {
-                _socket.close();
-                _socket.connect(*iterator++, error);
-            }
-            if (error)
-                throw boost::system::system_error(error);
-        #else
-            boost::asio::connect(_socket, iterator);
-        #endif
+        const auto endpoints = resolver.resolve(tcp::v4(), server, port, tcp::resolver::flags::passive);
+        boost::asio::connect(_socket, endpoints);
 
         UHD_LOG << "rpc_client connected to server." << std::endl;
 
@@ -109,11 +87,6 @@ rpc_client::rpc_client (
     } catch (boost::exception&) {
         UHD_LOG << "rpc_client connection request cancelled/aborted." << std::endl;
         _exec_err.assign(boost::asio::error::connection_aborted, boost::asio::error::get_system_category());
-#if BOOST_VERSION < 104700
-    } catch (std::exception& e) {
-        UHD_LOG << "rpc_client connection error: " << e.what() << std::endl;
-        _exec_err.assign(boost::asio::error::connection_aborted, boost::asio::error::get_system_category());
-#endif
     }
 }
 

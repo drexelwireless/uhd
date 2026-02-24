@@ -486,8 +486,8 @@ void network_server_impl::_run_server(
 {
     asio::io_context io_context;
     asio::ip::udp::resolver resolver(io_context);
-    asio::ip::udp::resolver::query query(asio::ip::udp::v4(), "0.0.0.0", port);
-    asio::ip::udp::endpoint endpoint = *resolver.resolve(query);
+    const auto endpoints = resolver.resolve(asio::ip::udp::v4(), "0.0.0.0", port);
+    asio::ip::udp::endpoint endpoint = *endpoints.begin();
 
     //boost::shared_ptr<asio::ip::udp::acceptor> acceptor(new asio::ip::udp::acceptor(io_context, endpoint));
     while (not boost::this_thread::interruption_requested())

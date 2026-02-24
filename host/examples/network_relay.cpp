@@ -81,16 +81,16 @@ public:
     ):_port(port){
         {
             asio::ip::udp::resolver resolver(_io_context);
-            asio::ip::udp::resolver::query query(asio::ip::udp::v4(), server_addr, port);
-            asio::ip::udp::endpoint endpoint = *resolver.resolve(query);
+            const auto endpoints = resolver.resolve(asio::ip::udp::v4(), server_addr, port);
+            asio::ip::udp::endpoint endpoint = *endpoints.begin();
 
             _server_socket = boost::shared_ptr<asio::ip::udp::socket>(new asio::ip::udp::socket(_io_context, endpoint));
             resize_buffs(_server_socket, server_rx_size, server_tx_size);
         }
         {
             asio::ip::udp::resolver resolver(_io_context);
-            asio::ip::udp::resolver::query query(asio::ip::udp::v4(), client_addr, port);
-            asio::ip::udp::endpoint endpoint = *resolver.resolve(query);
+            const auto endpoints = resolver.resolve(asio::ip::udp::v4(), client_addr, port);
+            asio::ip::udp::endpoint endpoint = *endpoints.begin();
 
             _client_socket = boost::shared_ptr<asio::ip::udp::socket>(new asio::ip::udp::socket(_io_context));
             _client_socket->open(asio::ip::udp::v4());
