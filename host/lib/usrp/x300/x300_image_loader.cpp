@@ -122,7 +122,7 @@ static void x300_validate_image(x300_session_t &session){
                                      % session.filepath));
     }
 
-    std::string extension = fs::extension(session.filepath);
+    std::string extension = fs::path(session.filepath).extension().string();
     session.lvbitx = (extension == ".lvbitx");
 
     if(session.lvbitx){
