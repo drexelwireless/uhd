@@ -22,7 +22,7 @@
 #include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/intrusive_ptr.hpp>
-#include <boost/detail/atomic_count.hpp>
+#include <boost/smart_ptr/detail/atomic_count.hpp>
 
 namespace uhd{ namespace transport{
 
