@@ -35,8 +35,8 @@ public:
 
         //resolve the address
         asio::ip::udp::resolver resolver(_io_context);
-        asio::ip::udp::resolver::query query(asio::ip::udp::v4(), addr, port);
-        _send_endpoint = *resolver.resolve(query);
+        const auto endpoints = resolver.resolve(asio::ip::udp::v4(), addr, port);
+        _send_endpoint = *endpoints.begin();
 
         //create and open the socket
         _socket = socket_sptr(new asio::ip::udp::socket(_io_context));

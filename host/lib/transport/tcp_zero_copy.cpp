@@ -148,8 +148,8 @@ public:
 
         //resolve the address
         asio::ip::tcp::resolver resolver(_io_context);
-        asio::ip::tcp::resolver::query query(asio::ip::tcp::v4(), addr, port);
-        asio::ip::tcp::endpoint receiver_endpoint = *resolver.resolve(query);
+        const auto endpoints = resolver.resolve(asio::ip::tcp::v4(), addr, port);
+        asio::ip::tcp::endpoint receiver_endpoint = *endpoints.begin();
 
         //create, open, and connect the socket
         _socket.reset(new asio::ip::tcp::socket(_io_context));

@@ -205,8 +205,8 @@ public:
         //resolve the address
         asio::io_context io_context;
         asio::ip::udp::resolver resolver(io_context);
-        asio::ip::udp::resolver::query query(asio::ip::udp::v4(), addr, port);
-        asio::ip::udp::endpoint receiver_endpoint = *resolver.resolve(query);
+        const auto endpoints = resolver.resolve(asio::ip::udp::v4(), addr, port);
+        asio::ip::udp::endpoint receiver_endpoint = *endpoints.begin();
 
         //create the socket
         _sock_fd = WSASocket(AF_INET, SOCK_DGRAM, IPPROTO_UDP, NULL, 0, WSA_FLAG_OVERLAPPED);
