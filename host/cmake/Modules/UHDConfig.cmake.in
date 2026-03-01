@@ -45,7 +45,11 @@ IF(UHD_DIR)
     LIST(APPEND UHD_LIBDIR_HINTS ${UHD_DIR}/lib)
 ENDIF()
 
+# CMake >= 3.31 warns when FindPkgConfig is included from inside another
+# package config module (here: UHD). This legacy module expects that flow.
+SET(FPHSA_NAME_MISMATCHED TRUE)
 INCLUDE(FindPkgConfig)
+UNSET(FPHSA_NAME_MISMATCHED)
 IF(PKG_CONFIG_FOUND)
   IF(NOT ${CMAKE_VERSION} VERSION_LESS "2.8.0")
     SET(UHD_QUIET "QUIET")
