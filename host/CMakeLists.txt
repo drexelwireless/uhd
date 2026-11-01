@@ -218,12 +218,13 @@ ENDIF()
 ########################################################################
 MESSAGE(STATUS "")
 MESSAGE(STATUS "Configuring Boost C++ Libraries...")
+# Boost.System has been header-only since Boost 1.69, and current releases
+# no longer install a library for it, so it is not a required component.
 SET(BOOST_REQUIRED_COMPONENTS
     date_time
     filesystem
     program_options
     regex
-    system
     unit_test_framework
     serialization
 )
@@ -246,12 +247,7 @@ IF(MSVC)
     ENDIF(BOOST_ALL_DYN_LINK)
 ENDIF(MSVC)
 
-SET(Boost_ADDITIONAL_VERSIONS
-    "1.46.0" "1.46" "1.47.0" "1.47" "1.48.0" "1.48" "1.48.0" "1.49" "1.50.0" "1.50"
-    "1.51.0" "1.51" "1.52.0" "1.52" "1.53.0" "1.53" "1.54.0" "1.54" "1.55.0" "1.55"
-    "1.56.0" "1.56"
-)
-FIND_PACKAGE(Boost 1.46 COMPONENTS ${BOOST_REQUIRED_COMPONENTS})
+FIND_PACKAGE(Boost 1.71 COMPONENTS ${BOOST_REQUIRED_COMPONENTS})
 
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
