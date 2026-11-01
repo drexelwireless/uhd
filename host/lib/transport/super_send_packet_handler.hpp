@@ -88,7 +88,7 @@ public:
         _task_barrier.resize(size);
         _task_handlers.resize(size);
         for (size_t i = 1/*skip 0*/; i < size; i++){
-            _task_handlers[i] = task::make(boost::bind(&send_packet_handler::converter_thread_task, this, i));
+            _task_handlers[i] = task::make(std::bind(&send_packet_handler::converter_thread_task, this, i));
         };
     }
 

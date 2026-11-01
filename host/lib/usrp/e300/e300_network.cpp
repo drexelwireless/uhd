@@ -133,7 +133,7 @@ static void e300_send_tunnel(
             if (not buff) continue;
 
             //step 2 - recv from socket
-            while (not wait_for_recv_ready(recver->native(), 100) and *running){}
+            while (not wait_for_recv_ready(recver->native_handle(), 100) and *running){}
             if (not *running) break;
             const size_t num_bytes = recver->receive_from(asio::buffer(buff->cast<void *>(), buff->size()), _rx_endpoint);
             if (E300_NETWORK_DEBUG) UHD_MSG(status) << name << " got " << num_bytes << std::endl;
@@ -483,23 +483,23 @@ void network_server_impl::_run_server(
     const std::string &what,
     const size_t fe)
 {
-    asio::io_service io_service;
-    asio::ip::udp::resolver resolver(io_service);
-    asio::ip::udp::resolver::query query(asio::ip::udp::v4(), "0.0.0.0", port);
-    asio::ip::udp::endpoint endpoint = *resolver.resolve(query);
+    asio::io_context io_context;
+    asio::ip::udp::resolver resolver(io_context);
+    const auto endpoints = resolver.resolve(asio::ip::udp::v4(), "0.0.0.0", port);
+    asio::ip::udp::endpoint endpoint = *endpoints.begin();
 
-    //boost::shared_ptr<asio::ip::udp::acceptor> acceptor(new asio::ip::udp::acceptor(io_service, endpoint));
+    //boost::shared_ptr<asio::ip::udp::acceptor> acceptor(new asio::ip::udp::acceptor(io_context, endpoint));
     while (not boost::this_thread::interruption_requested())
     {
         UHD_MSG(status) << "e300 run server on port " << port << " for " << what << std::endl;
         try
         {
-            //while (not wait_for_recv_ready(acceptor->native(), 100))
+            //while (not wait_for_recv_ready(acceptor->native_handle(), 100))
             //{
             //    if (boost::this_thread::interruption_requested()) return;
             //}
             boost::shared_ptr<asio::ip::udp::socket> socket;
-            socket.reset(new asio::ip::udp::socket(io_service, endpoint));
+            socket.reset(new asio::ip::udp::socket(io_context, endpoint));
             //acceptor->accept(*socket);
             UHD_MSG(status) << "e300 socket accept on port " << port << " for " << what << std::endl;
             //asio::ip::udp::no_delay option(true);
@@ -508,28 +508,28 @@ void network_server_impl::_run_server(
             bool running = true;
             xports_t &perif = _xports[fe];
             if (what == "RX") {
-                tg.create_thread(boost::bind(&e300_recv_tunnel, "RX data tunnel", perif.rx_data_xport, socket, &endpoint, &running));
-                tg.create_thread(boost::bind(&e300_send_tunnel, "RX flow tunnel", socket, perif.rx_flow_xport, &endpoint, &running));
+                tg.create_thread(std::bind(&e300_recv_tunnel, "RX data tunnel", perif.rx_data_xport, socket, &endpoint, &running));
+                tg.create_thread(std::bind(&e300_send_tunnel, "RX flow tunnel", socket, perif.rx_flow_xport, &endpoint, &running));
             }
             if (what == "TX") {
-                tg.create_thread(boost::bind(&e300_recv_tunnel, "TX flow tunnel", perif.tx_flow_xport, socket, &endpoint, &running));
-                tg.create_thread(boost::bind(&e300_send_tunnel, "TX data tunnel", socket, perif.tx_data_xport, &endpoint, &running));
+                tg.create_thread(std::bind(&e300_recv_tunnel, "TX flow tunnel", perif.tx_flow_xport, socket, &endpoint, &running));
+                tg.create_thread(std::bind(&e300_send_tunnel, "TX data tunnel", socket, perif.tx_data_xport, &endpoint, &running));
             }
             if (what == "CTRL") {
-                tg.create_thread(boost::bind(&e300_recv_tunnel, "response tunnel", perif.recv_ctrl_xport, socket, &endpoint, &running));
-                tg.create_thread(boost::bind(&e300_send_tunnel, "control tunnel", socket, perif.send_ctrl_xport, &endpoint, &running));
+                tg.create_thread(std::bind(&e300_recv_tunnel, "response tunnel", perif.recv_ctrl_xport, socket, &endpoint, &running));
+                tg.create_thread(std::bind(&e300_send_tunnel, "control tunnel", socket, perif.send_ctrl_xport, &endpoint, &running));
             }
             if (what == "CODEC") {
-                tg.create_thread(boost::bind(&e300_codec_ctrl_tunnel, "CODEC tunnel", socket, _codec_ctrl, &endpoint, &running));
+                tg.create_thread(std::bind(&e300_codec_ctrl_tunnel, "CODEC tunnel", socket, _codec_ctrl, &endpoint, &running));
             }
             if (what == "I2C") {
-                tg.create_thread(boost::bind(&e300_i2c_tunnel, "I2C tunnel", socket, _eeprom_manager->get_i2c_sptr(), &endpoint, &running));
+                tg.create_thread(std::bind(&e300_i2c_tunnel, "I2C tunnel", socket, _eeprom_manager->get_i2c_sptr(), &endpoint, &running));
             }
             if (what == "GREGS") {
-                tg.create_thread(boost::bind(&e300_global_regs_tunnel, "GREGS tunnel", socket, _global_regs, &endpoint, &running));
+                tg.create_thread(std::bind(&e300_global_regs_tunnel, "GREGS tunnel", socket, _global_regs, &endpoint, &running));
             }
             if (what == "SENSOR") {
-                tg.create_thread(boost::bind(&e300_sensor_tunnel, "SENSOR tunnel", socket, _sensor_manager, &endpoint, &running));
+                tg.create_thread(std::bind(&e300_sensor_tunnel, "SENSOR tunnel", socket, _sensor_manager, &endpoint, &running));
             }
 
             tg.join_all();
@@ -545,19 +545,19 @@ void network_server_impl::run()
     for(;;)
     {
         boost::thread_group tg;
-        tg.create_thread(boost::bind(&network_server_impl::_run_server, this, E300_SERVER_RX_PORT0, "RX",0));
-        tg.create_thread(boost::bind(&network_server_impl::_run_server, this, E300_SERVER_TX_PORT0, "TX",0));
-        tg.create_thread(boost::bind(&network_server_impl::_run_server, this, E300_SERVER_CTRL_PORT0, "CTRL",0));
+        tg.create_thread(std::bind(&network_server_impl::_run_server, this, E300_SERVER_RX_PORT0, "RX",0));
+        tg.create_thread(std::bind(&network_server_impl::_run_server, this, E300_SERVER_TX_PORT0, "TX",0));
+        tg.create_thread(std::bind(&network_server_impl::_run_server, this, E300_SERVER_CTRL_PORT0, "CTRL",0));
 
-        tg.create_thread(boost::bind(&network_server_impl::_run_server, this, E300_SERVER_RX_PORT1, "RX",1));
-        tg.create_thread(boost::bind(&network_server_impl::_run_server, this, E300_SERVER_TX_PORT1, "TX",1));
-        tg.create_thread(boost::bind(&network_server_impl::_run_server, this, E300_SERVER_CTRL_PORT1, "CTRL",1));
+        tg.create_thread(std::bind(&network_server_impl::_run_server, this, E300_SERVER_RX_PORT1, "RX",1));
+        tg.create_thread(std::bind(&network_server_impl::_run_server, this, E300_SERVER_TX_PORT1, "TX",1));
+        tg.create_thread(std::bind(&network_server_impl::_run_server, this, E300_SERVER_CTRL_PORT1, "CTRL",1));
 
-        tg.create_thread(boost::bind(&network_server_impl::_run_server, this, E300_SERVER_SENSOR_PORT, "SENSOR", 0 /*don't care */));
+        tg.create_thread(std::bind(&network_server_impl::_run_server, this, E300_SERVER_SENSOR_PORT, "SENSOR", 0 /*don't care */));
 
-        tg.create_thread(boost::bind(&network_server_impl::_run_server, this, E300_SERVER_CODEC_PORT, "CODEC", 0 /*don't care */));
-        tg.create_thread(boost::bind(&network_server_impl::_run_server, this, E300_SERVER_GREGS_PORT, "GREGS", 0 /*don't care */));
-        tg.create_thread(boost::bind(&network_server_impl::_run_server, this, E300_SERVER_I2C_PORT, "I2C", 0 /*don't care */));
+        tg.create_thread(std::bind(&network_server_impl::_run_server, this, E300_SERVER_CODEC_PORT, "CODEC", 0 /*don't care */));
+        tg.create_thread(std::bind(&network_server_impl::_run_server, this, E300_SERVER_GREGS_PORT, "GREGS", 0 /*don't care */));
+        tg.create_thread(std::bind(&network_server_impl::_run_server, this, E300_SERVER_I2C_PORT, "I2C", 0 /*don't care */));
         tg.join_all();
     }
 }

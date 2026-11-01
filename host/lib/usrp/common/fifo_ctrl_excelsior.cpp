@@ -28,7 +28,7 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/format.hpp>
-#include <boost/bind.hpp>
+#include <functional>
 
 using namespace uhd;
 using namespace uhd::usrp;
@@ -64,7 +64,7 @@ public:
         while (_xport->get_recv_buff(0.0)){} //flush
         this->set_time(uhd::time_spec_t(0.0));
         this->set_tick_rate(1.0); //something possible but bogus
-        _msg_task = task::make(boost::bind(&fifo_ctrl_excelsior_impl::handle_msg, this));
+        _msg_task = task::make(std::bind(&fifo_ctrl_excelsior_impl::handle_msg, this));
         this->init_spi();
     }
 

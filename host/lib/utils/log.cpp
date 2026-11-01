@@ -118,9 +118,9 @@ UHD_SINGLETON_FCN(log_resource_type, log_rs);
 //! get the relative file path from the host directory
 static std::string get_rel_file_path(const fs::path &file){
     fs::path abs_path = file.parent_path();
-    fs::path rel_path = file.leaf();
-    while (not abs_path.empty() and abs_path.leaf() != "host"){
-        rel_path = abs_path.leaf() / rel_path;
+    fs::path rel_path = file.filename();
+    while (not abs_path.empty() and abs_path.filename().string() != "host"){
+        rel_path = abs_path.filename() / rel_path;
         abs_path = abs_path.parent_path();
     }
     return rel_path.string();

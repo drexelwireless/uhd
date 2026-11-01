@@ -182,15 +182,15 @@ public:
         #endif /*CHECK_REG_SEND_THRESH*/
 
         //resolve the address
-        asio::ip::udp::resolver resolver(_io_service);
-        asio::ip::udp::resolver::query query(asio::ip::udp::v4(), addr, port);
-        asio::ip::udp::endpoint receiver_endpoint = *resolver.resolve(query);
+        asio::ip::udp::resolver resolver(_io_context);
+        const auto endpoints = resolver.resolve(asio::ip::udp::v4(), addr, port);
+        asio::ip::udp::endpoint receiver_endpoint = *endpoints.begin();
 
         //create, open, and connect the socket
-        _socket = socket_sptr(new asio::ip::udp::socket(_io_service));
+        _socket = socket_sptr(new asio::ip::udp::socket(_io_context));
         _socket->open(asio::ip::udp::v4());
         _socket->connect(receiver_endpoint);
-        _sock_fd = _socket->native();
+        _sock_fd = _socket->native_handle();
 
         //allocate re-usable managed receive buffers
         for (size_t i = 0; i < get_num_recv_frames(); i++){
@@ -255,7 +255,7 @@ private:
     size_t _next_recv_buff_index, _next_send_buff_index;
 
     //asio guts -> socket and service
-    asio::io_service        _io_service;
+    asio::io_context        _io_context;
     socket_sptr             _socket;
     int                     _sock_fd;
 };

@@ -350,7 +350,7 @@ int UHD_SAFE_MAIN(UHD_UNUSED(int argc), UHD_UNUSED(char *argv[])){
     else firmware_path = find_image_path("octoclock_r4_fw.hex");
 
     //If Intel hex file detected, convert to binary
-    std::string ext = fs::extension(firmware_path);
+    std::string ext = fs::path(firmware_path).extension().string();
     if(ext == ".hex"){
         std::cout << "Found firmware at path: " << firmware_path << std::endl;
 

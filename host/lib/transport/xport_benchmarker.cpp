@@ -32,8 +32,8 @@ const device_addr_t& xport_benchmarker::benchmark_throughput_chdr
     _reset_counters();
     boost::posix_time::ptime start_time(boost::posix_time::microsec_clock::local_time());
 
-    _tx_thread.reset(new boost::thread(boost::bind(&xport_benchmarker::_stream_tx, this, tx_transport.get(), &pkt_info, big_endian)));
-    _rx_thread.reset(new boost::thread(boost::bind(&xport_benchmarker::_stream_rx, this, rx_transport.get(), &pkt_info, big_endian)));
+    _tx_thread.reset(new boost::thread(std::bind(&xport_benchmarker::_stream_tx, this, tx_transport.get(), &pkt_info, big_endian)));
+    _rx_thread.reset(new boost::thread(std::bind(&xport_benchmarker::_stream_rx, this, rx_transport.get(), &pkt_info, big_endian)));
 
     boost::this_thread::sleep(boost::posix_time::milliseconds(duration_ms));
 

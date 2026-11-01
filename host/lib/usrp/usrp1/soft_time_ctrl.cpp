@@ -54,7 +54,7 @@ public:
         _stream_on_off(stream_on_off)
     {
         //synchronously spawn a new thread
-        _recv_cmd_task = task::make(boost::bind(&soft_time_ctrl_impl::recv_cmd_task, this));
+        _recv_cmd_task = task::make(std::bind(&soft_time_ctrl_impl::recv_cmd_task, this));
 
         //initialize the time to something
         this->set_time(time_spec_t(0.0));

@@ -80,19 +80,19 @@ public:
         const size_t client_tx_size = 0
     ):_port(port){
         {
-            asio::ip::udp::resolver resolver(_io_service);
-            asio::ip::udp::resolver::query query(asio::ip::udp::v4(), server_addr, port);
-            asio::ip::udp::endpoint endpoint = *resolver.resolve(query);
+            asio::ip::udp::resolver resolver(_io_context);
+            const auto endpoints = resolver.resolve(asio::ip::udp::v4(), server_addr, port);
+            asio::ip::udp::endpoint endpoint = *endpoints.begin();
 
-            _server_socket = boost::shared_ptr<asio::ip::udp::socket>(new asio::ip::udp::socket(_io_service, endpoint));
+            _server_socket = boost::shared_ptr<asio::ip::udp::socket>(new asio::ip::udp::socket(_io_context, endpoint));
             resize_buffs(_server_socket, server_rx_size, server_tx_size);
         }
         {
-            asio::ip::udp::resolver resolver(_io_service);
-            asio::ip::udp::resolver::query query(asio::ip::udp::v4(), client_addr, port);
-            asio::ip::udp::endpoint endpoint = *resolver.resolve(query);
+            asio::ip::udp::resolver resolver(_io_context);
+            const auto endpoints = resolver.resolve(asio::ip::udp::v4(), client_addr, port);
+            asio::ip::udp::endpoint endpoint = *endpoints.begin();
 
-            _client_socket = boost::shared_ptr<asio::ip::udp::socket>(new asio::ip::udp::socket(_io_service));
+            _client_socket = boost::shared_ptr<asio::ip::udp::socket>(new asio::ip::udp::socket(_io_context));
             _client_socket->open(asio::ip::udp::v4());
             _client_socket->connect(endpoint);
             resize_buffs(_client_socket, client_rx_size, client_tx_size);
@@ -100,9 +100,9 @@ public:
 
         std::cout << "spawning relay threads... " << _port << std::endl;
         boost::unique_lock<boost::mutex> lock(spawn_mutex);     // lock in preparation to wait for threads to spawn
-        _thread_group.create_thread(boost::bind(&udp_relay_type::server_thread, this));
+        _thread_group.create_thread(std::bind(&udp_relay_type::server_thread, this));
         wait_for_thread.wait(lock);      // wait for thread to spin up
-        _thread_group.create_thread(boost::bind(&udp_relay_type::client_thread, this));
+        _thread_group.create_thread(std::bind(&udp_relay_type::client_thread, this));
         wait_for_thread.wait(lock);      // wait for thread to spin up
         std::cout << "    done!" << std::endl << std::endl;
     }
@@ -127,7 +127,7 @@ private:
         wait_for_thread.notify_one();    // notify constructor that this thread has started
         std::vector<char> buff(insane_mtu);
         while (not boost::this_thread::interruption_requested()){
-            if (wait_for_recv_ready(_server_socket->native())){
+            if (wait_for_recv_ready(_server_socket->native_handle())){
                 boost::mutex::scoped_lock lock(_endpoint_mutex);
                 const size_t len = _server_socket->receive_from(asio::buffer(&buff.front(), buff.size()), _endpoint);
                 lock.unlock();
@@ -153,7 +153,7 @@ private:
         wait_for_thread.notify_one();    // notify constructor that this thread has started
         std::vector<char> buff(insane_mtu);
         while (not boost::this_thread::interruption_requested()){
-            if (wait_for_recv_ready(_client_socket->native())){
+            if (wait_for_recv_ready(_client_socket->native_handle())){
                 const size_t len = _client_socket->receive(asio::buffer(&buff.front(), buff.size()));
                 boost::mutex::scoped_lock lock(_endpoint_mutex);
                 _server_socket->send_to(asio::buffer(&buff.front(), len), _endpoint);
@@ -164,7 +164,7 @@ private:
 
     const std::string _port;
     boost::thread_group _thread_group;
-    asio::io_service _io_service;
+    asio::io_context _io_context;
     asio::ip::udp::endpoint _endpoint;
     boost::mutex _endpoint_mutex;
     socket_type _server_socket, _client_socket;

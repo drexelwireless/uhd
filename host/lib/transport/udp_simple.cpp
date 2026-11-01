@@ -34,12 +34,12 @@ public:
         UHD_LOG << boost::format("Creating udp transport for %s %s") % addr % port << std::endl;
 
         //resolve the address
-        asio::ip::udp::resolver resolver(_io_service);
-        asio::ip::udp::resolver::query query(asio::ip::udp::v4(), addr, port);
-        _send_endpoint = *resolver.resolve(query);
+        asio::ip::udp::resolver resolver(_io_context);
+        const auto endpoints = resolver.resolve(asio::ip::udp::v4(), addr, port);
+        _send_endpoint = *endpoints.begin();
 
         //create and open the socket
-        _socket = socket_sptr(new asio::ip::udp::socket(_io_service));
+        _socket = socket_sptr(new asio::ip::udp::socket(_io_context));
         _socket->open(asio::ip::udp::v4());
 
         //allow broadcasting
@@ -56,7 +56,7 @@ public:
     }
 
     size_t recv(const asio::mutable_buffer &buff, double timeout){
-        if (not wait_for_recv_ready(_socket->native(), timeout)) return 0;
+        if (not wait_for_recv_ready(_socket->native_handle(), timeout)) return 0;
         return _socket->receive_from(asio::buffer(buff), _recv_endpoint);
     }
 
@@ -66,7 +66,7 @@ public:
 
 private:
     bool                    _connected;
-    asio::io_service        _io_service;
+    asio::io_context        _io_context;
     socket_sptr             _socket;
     asio::ip::udp::endpoint _send_endpoint;
     asio::ip::udp::endpoint _recv_endpoint;
