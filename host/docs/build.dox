@@ -150,6 +150,15 @@ Example usage:
 
     cmake -DCMAKE_INSTALL_PREFIX=/opt/uhd ../
 
+Each optional component, such as USB transport or B200 support, has an
+`ENABLE_<component>` setting that accepts `AUTO`, `ON`, or `OFF`. `AUTO`
+enables the component when its dependencies are available. `ON` requires
+the component, and configuration fails with a list of the missing
+dependencies if they are not available. `OFF` disables it. For example, a
+build that must support the B200 can be configured as follows:
+
+    cmake -DENABLE_B200=ON ../
+
 \subsection build_install_unix Build and install
 
     make
