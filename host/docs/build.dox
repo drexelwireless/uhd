@@ -24,13 +24,10 @@ follow the auxiliary download URL for the Windows installer (below).
 
 ### C++ Compiler
 
-The following compilers are known to work and officially supported:
-
-- GCC >= 4.4
-- Clang >= 3.1
-- MSVC >= 2012; the free <a href="https://www.visualstudio.com/en-us/products/visual-studio-express-vs.aspx">Visual Studio Express Edition for Desktop</a> works.
-
-Other compilers (or lower versions) may work, but are unsupported.
+UHD requires a compiler that supports C++17. The build sets
+`CMAKE_CXX_STANDARD` to 17 and rejects an older standard. GCC 9.4, 13.3,
+and 15.2 have been tested. Other compilers with C++17 support may work but
+have not been tested with this version.
 
 ### CMake
 
