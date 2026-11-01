@@ -32,7 +32,7 @@ have not been tested with this version.
 ### CMake
 
 - **Purpose:** generates project build files
-- **Minimum Version:** 2.6
+- **Minimum Version:** 3.16
 - **Usage:** build time (required)
 - **Download URL:** http://www.cmake.org/cmake/resources/software.html
 
@@ -55,7 +55,7 @@ have not been tested with this version.
 ### Python
 
 - **Purpose:** used by mako and utility scripts
-- **Minimum Version:** 2.6
+- **Minimum Version:** 3.8
 - **Usage:** build time + runtime utility scripts (required)
 - **Download URL:** http://www.python.org/download/
 

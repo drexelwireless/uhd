@@ -23,36 +23,17 @@ SET(INCLUDED_UHD_PYTHON_CMAKE TRUE)
 ########################################################################
 MESSAGE(STATUS "")
 MESSAGE(STATUS "Configuring the python interpreter...")
-#this allows the user to override PYTHON_EXECUTABLE
+# PYTHON_EXECUTABLE overrides interpreter discovery. FindPython3 validates the
+# selected interpreter against the minimum version, and the build invokes it
+# through PYTHON_EXECUTABLE.
 IF(PYTHON_EXECUTABLE)
-
-    SET(PYTHONINTERP_FOUND TRUE)
-
-#otherwise if not set, try to automatically find it
-ELSE(PYTHON_EXECUTABLE)
-
-    #use the built-in find script
-    FIND_PACKAGE(PythonInterp)
-
-    #and if that fails use the find program routine
-    IF(NOT PYTHONINTERP_FOUND)
-        FIND_PROGRAM(PYTHON_EXECUTABLE NAMES python python2.7 python2.6)
-        IF(PYTHON_EXECUTABLE)
-            SET(PYTHONINTERP_FOUND TRUE)
-        ENDIF(PYTHON_EXECUTABLE)
-    ENDIF(NOT PYTHONINTERP_FOUND)
-
+    SET(Python3_EXECUTABLE ${PYTHON_EXECUTABLE})
 ENDIF(PYTHON_EXECUTABLE)
+FIND_PACKAGE(Python3 3.8 REQUIRED COMPONENTS Interpreter)
+SET(PYTHON_EXECUTABLE ${Python3_EXECUTABLE} CACHE FILEPATH "python interpreter" FORCE)
 
-#make the path to the executable appear in the cmake gui
-SET(PYTHON_EXECUTABLE ${PYTHON_EXECUTABLE} CACHE FILEPATH "python interpreter")
-
-MESSAGE(STATUS "Python interpreter: ${PYTHON_EXECUTABLE}")
+MESSAGE(STATUS "Python interpreter: ${PYTHON_EXECUTABLE} (${Python3_VERSION})")
 MESSAGE(STATUS "Override with: -DPYTHON_EXECUTABLE=<path-to-python>")
-
-IF(NOT PYTHONINTERP_FOUND)
-    MESSAGE(FATAL_ERROR "Error: Python interpreter required by the build system.")
-ENDIF(NOT PYTHONINTERP_FOUND)
 
 MACRO(PYTHON_CHECK_MODULE desc mod cmd have)
     MESSAGE(STATUS "")
