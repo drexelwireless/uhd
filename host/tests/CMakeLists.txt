@@ -70,6 +70,15 @@ FOREACH(test_source ${test_sources})
     UHD_INSTALL(TARGETS ${test_name} RUNTIME DESTINATION ${PKG_LIB_DIR}/tests COMPONENT tests)
 ENDFOREACH(test_source)
 
+IF(ENABLE_X300)
+    ADD_EXECUTABLE(x300_adc_ctrl_test x300_adc_ctrl_test.cpp
+        ../lib/usrp/x300/x300_adc_ctrl.cpp)
+    TARGET_INCLUDE_DIRECTORIES(x300_adc_ctrl_test PRIVATE
+        ${CMAKE_BINARY_DIR}/lib/ic_reg_maps)
+    TARGET_LINK_LIBRARIES(x300_adc_ctrl_test uhd ${Boost_LIBRARIES})
+    UHD_ADD_TEST(x300_adc_ctrl_test x300_adc_ctrl_test)
+ENDIF(ENABLE_X300)
+
 ########################################################################
 # demo of a loadable module
 ########################################################################
