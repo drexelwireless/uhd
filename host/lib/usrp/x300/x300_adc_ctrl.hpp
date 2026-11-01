@@ -45,7 +45,13 @@ public:
      */
     virtual double set_gain(const double &gain) = 0;
 
-    virtual void set_test_word(const std::string &patterna, const std::string &patternb, const boost::uint32_t = 0) = 0;
+    /*!
+     * Select the test pattern independently for each ADC channel.
+     * \param patterna channel A pattern: normal, zeros, ones, ramp, or custom
+     * \param patternb channel B pattern: normal, zeros, ones, ramp, or custom
+     * \param num the 14-bit custom pattern used by either channel in custom mode
+     */
+    virtual void set_test_word(const std::string &patterna, const std::string &patternb, const boost::uint32_t num = 0) = 0;
 
     virtual void reset(void) = 0;
 };

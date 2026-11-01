@@ -2,6 +2,7 @@
 #include <boost/make_shared.hpp>
 #include <boost/test/unit_test.hpp>
 #include <map>
+#include <utility>
 
 namespace {
 
@@ -64,4 +65,24 @@ BOOST_AUTO_TEST_CASE(test_x300_adc_gain_preserves_half_db_steps)
     BOOST_CHECK_EQUAL(adc->set_gain(7.0), 6.0);
     BOOST_CHECK_EQUAL(spi->value(0x55) >> 4, 12);
     BOOST_CHECK_EQUAL(spi->value(0x68) >> 4, 12);
+}
+
+BOOST_AUTO_TEST_CASE(test_x300_adc_patterns_are_independent)
+{
+    const auto spi = boost::make_shared<recording_spi>();
+    const auto adc = x300_adc_ctrl::make(spi, 0);
+    const std::pair<const char *, unsigned> patterns[] = {
+        {"normal", 0}, {"zeros", 1}, {"ones", 2}, {"ramp", 4}, {"custom", 5}
+    };
+    for (const auto &a : patterns) {
+        for (const auto &b : patterns) {
+            BOOST_TEST_CONTEXT("A=" << a.first << ", B=" << b.first) {
+                adc->set_test_word(a.first, b.first, 0x2a35);
+                BOOST_CHECK_EQUAL(spi->value(0x62) & 7, a.second);
+                BOOST_CHECK_EQUAL(spi->value(0x75) & 7, b.second);
+                BOOST_CHECK_EQUAL(spi->value(0x51), 0x35);
+                BOOST_CHECK_EQUAL(spi->value(0x52), 0x2a);
+            }
+        }
+    }
 }
