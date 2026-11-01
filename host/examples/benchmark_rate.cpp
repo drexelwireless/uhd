@@ -24,7 +24,7 @@
 #include <boost/thread/thread.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
-//#include <boost/atomic.hpp>
+#include <atomic>
 #include <iostream>
 #include <complex>
 #include <cstdlib>
@@ -39,10 +39,7 @@ namespace po = boost::program_options;
 
 const double CLOCK_TIMEOUT = 1000;  // 1000mS timeout for external clock locking
 const double INIT_DELAY    = 0.05;  // 50mS initial delay before transmit
-//typedef boost::atomic<bool>   atomic_bool;
-// We'll fake atomic bools for now, for more backward compat.
-// This is just an example, after all.
-typedef bool atomic_bool;
+typedef std::atomic<bool> atomic_bool;
 
 /***********************************************************************
  * Test result variables
@@ -94,7 +91,6 @@ void benchmark_rx_rate(
 
     bool stop_called = false;
     while (true) {
-        //if (burst_timer_elapsed.load(boost::memory_order_relaxed) and not stop_called) {
         if (burst_timer_elapsed and not stop_called) {
             rx_stream->issue_stream_cmd(uhd::stream_cmd_t::STREAM_MODE_STOP_CONTINUOUS);
             stop_called = true;
@@ -192,7 +188,6 @@ void benchmark_tx_rate(
 
     if (random_nsamps) {
         std::srand((unsigned int)time(NULL));
-        //while (not burst_timer_elapsed.load(boost::memory_order_relaxed)) {
         while (not burst_timer_elapsed) {
             size_t total_num_samps = rand() % max_samps_per_packet;
             size_t num_acc_samps = 0;
@@ -206,7 +201,6 @@ void benchmark_tx_rate(
             }
         }
     } else {
-        //while (not burst_timer_elapsed.load(boost::memory_order_relaxed)) {
         while (not burst_timer_elapsed) {
             num_tx_samps += tx_stream->send(buffs, max_samps_per_packet, md)*tx_stream->get_num_channels();
             md.has_time_spec = false;
@@ -227,7 +221,6 @@ void benchmark_tx_rate_async_helper(
     bool exit_flag = false;
 
     while (true) {
-        //if (burst_timer_elapsed.load(boost::memory_order_relaxed)) {
         if (burst_timer_elapsed) {
             exit_flag = true;
         }
@@ -482,7 +475,6 @@ int UHD_SAFE_MAIN(int argc, char *argv[]){
     );
 
     //interrupt and join the threads
-    //burst_timer_elapsed.store(true, boost::memory_order_relaxed);
     burst_timer_elapsed = true;
     thread_group.join_all();
 
