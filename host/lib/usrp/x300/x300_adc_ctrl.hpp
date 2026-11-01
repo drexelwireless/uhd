@@ -37,7 +37,13 @@ public:
      */
     static sptr make(uhd::spi_iface::sptr iface, const size_t slaveno);
 
-    virtual double set_gain(const double &) = 0;
+    /*!
+     * Set digital gain on both ADC channels.
+     * \param gain requested gain in dB, clipped to 0 through 6 dB and rounded
+     * to the nearest 0.5 dB
+     * \return the applied gain in dB
+     */
+    virtual double set_gain(const double &gain) = 0;
 
     virtual void set_test_word(const std::string &patterna, const std::string &patternb, const boost::uint32_t = 0) = 0;
 

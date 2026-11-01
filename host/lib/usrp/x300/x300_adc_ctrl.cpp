@@ -94,7 +94,7 @@ public:
         _ads62p48_regs.gain_chB = gain_bits;
         this->send_ads62p48_reg(0x55);
         this->send_ads62p48_reg(0x68);
-        return gain_bits/2;
+        return gain_bits/2.0;
     }
 
     void set_test_word(const std::string &patterna, const std::string &patternb, const boost::uint32_t num)
