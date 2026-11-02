@@ -117,9 +117,9 @@ private:
     usrprio_rpc::usrprio_rpc_client _rpc_client;
     boost::recursive_mutex          _session_mutex;
 
-    static const uint32_t FPGA_READY_TIMEOUT_IN_MS      = 1000;
-    static const uint32_t SESSION_LOCK_TIMEOUT_IN_MS    = 3000;
-    static const uint32_t SESSION_LOCK_RETRY_INT_IN_MS  = 500;
+    static constexpr uint32_t FPGA_READY_TIMEOUT_IN_MS      = 1000;
+    static constexpr uint32_t SESSION_LOCK_TIMEOUT_IN_MS    = 3000;
+    static constexpr uint32_t SESSION_LOCK_RETRY_INT_IN_MS  = 500;
 };
 
 }}

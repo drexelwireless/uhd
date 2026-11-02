@@ -418,12 +418,12 @@ private:
     GPS_TYPE_NONE
   } _gps_type;
 
-  static const int GPS_COMM_TIMEOUT_MS = 1300;
-  static const int GPS_NMEA_NORMAL_FRESHNESS = 1000;
-  static const int GPS_SERVO_FRESHNESS = 1000;
-  static const int GPS_LOCK_FRESHNESS = 2500;
-  static const int GPS_TIMEOUT_DELAY_MS = 200;
-  static const int GPSDO_COMMAND_DELAY_MS = 200;
+  static constexpr int GPS_COMM_TIMEOUT_MS = 1300;
+  static constexpr int GPS_NMEA_NORMAL_FRESHNESS = 1000;
+  static constexpr int GPS_SERVO_FRESHNESS = 1000;
+  static constexpr int GPS_LOCK_FRESHNESS = 2500;
+  static constexpr int GPS_TIMEOUT_DELAY_MS = 200;
+  static constexpr int GPSDO_COMMAND_DELAY_MS = 200;
 };
 
 /***********************************************************************
