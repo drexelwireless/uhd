@@ -24,25 +24,22 @@ follow the auxiliary download URL for the Windows installer (below).
 
 ### C++ Compiler
 
-The following compilers are known to work and officially supported:
-
-- GCC >= 4.4
-- Clang >= 3.1
-- MSVC >= 2012; the free <a href="https://www.visualstudio.com/en-us/products/visual-studio-express-vs.aspx">Visual Studio Express Edition for Desktop</a> works.
-
-Other compilers (or lower versions) may work, but are unsupported.
+UHD requires a compiler that supports C++17. The build sets
+`CMAKE_CXX_STANDARD` to 17 and rejects an older standard. GCC 9.4, 13.3,
+and 15.2 have been tested. Other compilers with C++17 support may work but
+have not been tested with this version.
 
 ### CMake
 
 - **Purpose:** generates project build files
-- **Minimum Version:** 2.6
+- **Minimum Version:** 3.16
 - **Usage:** build time (required)
 - **Download URL:** http://www.cmake.org/cmake/resources/software.html
 
 ### Boost
 
 - **Purpose:** C++ library
-- **Minimum Version:** 1.46
+- **Minimum Version:** 1.71
 - **Usage:** build time + runtime (required)
 - **Download URL:** http://www.boost.org/users/download/
 - **Download URL (Windows installer):** http://sourceforge.net/projects/boost/files/boost-binaries/
@@ -58,7 +55,7 @@ Other compilers (or lower versions) may work, but are unsupported.
 ### Python
 
 - **Purpose:** used by mako and utility scripts
-- **Minimum Version:** 2.6
+- **Minimum Version:** 3.8
 - **Usage:** build time + runtime utility scripts (required)
 - **Download URL:** http://www.python.org/download/
 
@@ -152,6 +149,15 @@ The following common-use configuration variables are listed below:
 Example usage:
 
     cmake -DCMAKE_INSTALL_PREFIX=/opt/uhd ../
+
+Each optional component, such as USB transport or B200 support, has an
+`ENABLE_<component>` setting that accepts `AUTO`, `ON`, or `OFF`. `AUTO`
+enables the component when its dependencies are available. `ON` requires
+the component, and configuration fails with a list of the missing
+dependencies if they are not available. `OFF` disables it. For example, a
+build that must support the B200 can be configured as follows:
+
+    cmake -DENABLE_B200=ON ../
 
 \subsection build_install_unix Build and install
 

@@ -15,7 +15,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.16)
+
+# Handle removal of FindBoost module in cmake 3.30.
+if(POLICY CMP0167)
+    cmake_policy(SET CMP0167 NEW)
+endif()
+
+project(init_usrp CXX)
 
 ### Set up build environment ##################################################
 # Choose a static or shared-library build (shared is default, and static will
@@ -23,10 +30,11 @@ cmake_minimum_required(VERSION 2.8)
 # Set this to ON in order to link a static build of UHD:
 option(UHD_USE_STATIC_LIBS OFF)
 
-# This example also requires Boost:
+# This example also requires Boost. Boost.System has been header-only since
+# Boost 1.69, and current releases no longer install a library for it, so it
+# is not a required component.
 set(BOOST_REQUIRED_COMPONENTS
     program_options
-    system
     thread
 )
 if(MSVC)
@@ -37,7 +45,7 @@ if(MSVC)
         set(BOOST_REQUIRED_COMPONENTS) #empty components list for static link
     endif(BOOST_ALL_DYN_LINK)
 endif(MSVC)
-find_package(Boost "1.46" REQUIRED ${BOOST_REQUIRED_COMPONENTS})
+find_package(Boost "1.71" REQUIRED ${BOOST_REQUIRED_COMPONENTS})
 
 # To add UHD as a dependency to this project, add a line such as this:
 find_package(UHD "3.8.0" REQUIRED)

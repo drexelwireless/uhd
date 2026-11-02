@@ -23,19 +23,9 @@
 ########################################################################
 # Project setup
 ########################################################################
-CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.16)
 PROJECT(UHD CXX C)
 ENABLE_TESTING()
-
-# Prefer new option behavior in cmake 3.13+
-if(POLICY CMP0077)
-    cmake_policy(SET CMP0077 NEW)
-endif()
-
-# Handle removal of FindPythonInterp and FindPythonLibs modules in cmake 3.27
-if(POLICY CMP0148)
-    cmake_policy(SET CMP0148 OLD)
-endif()
 
 # Handle removal of FindBoost module in cmake 3.30.
 if(POLICY CMP0167)
@@ -46,49 +36,17 @@ endif()
 list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
 ########################################################################
-# Check Compiler Version
+# C++ Language Standard
 ########################################################################
-SET(GCC_MIN_VERSION "4.4.0")
-SET(CLANG_MIN_VERSION "3.1.0")
-SET(APPLECLANG_MIN_VERSION "500")
-
-IF(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-    IF(DEFINED CMAKE_CXX_COMPILER_VERSION)
-        IF(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS ${GCC_MIN_VERSION})
-            MESSAGE(WARNING "\nThe compiler selected to build UHD (GCC version ${CMAKE_CXX_COMPILER_VERSION} : ${CMAKE_CXX_COMPILER}) is older than that officially supported (${GCC_MIN_VERSION} minimum). This build may or not work. We highly recommend using a more recent GCC version.")
-         ENDIF()
-    ELSE()
-        MESSAGE(WARNING "\nCannot determine the version of the compiler selected to build UHD (GCC : ${CMAKE_CXX_COMPILER}). This build may or not work. We highly recommend using GCC version ${GCC_MIN_VERSION} or more recent.")
-    ENDIF()
-    SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
-ELSEIF(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
-    EXECUTE_PROCESS(COMMAND
-        ${CMAKE_CXX_COMPILER} -v
-        RESULT_VARIABLE res ERROR_VARIABLE err
-        ERROR_STRIP_TRAILING_WHITESPACE)
-    IF(${res} STREQUAL "0")
-        # output is in error stream
-        STRING(REGEX MATCH "^Apple.*" IS_APPLE ${err})
-        IF("${IS_APPLE}" STREQUAL "")
-            SET(MIN_VERSION ${CLANG_MIN_VERSION})
-            SET(APPLE_STR "")
-            # retrieve the compiler's version from it
-            STRING(REGEX MATCH "clang version [0-9.]+" CLANG_OTHER_VERSION ${err})
-            STRING(REGEX MATCH "[0-9.]+" CLANG_VERSION ${CLANG_OTHER_VERSION})
-        ELSE()
-            SET(MIN_VERSION ${APPLECLANG_MIN_VERSION})
-            SET(APPLE_STR "Apple ")
-            # retrieve the compiler's version from it
-            STRING(REGEX MATCH "(clang-[0-9.]+)" CLANG_APPLE_VERSION ${err})
-            STRING(REGEX MATCH "[0-9.]+" CLANG_VERSION ${CLANG_APPLE_VERSION})
-        ENDIF()
-        IF(${CLANG_VERSION} VERSION_LESS "${MIN_VERSION}")
-            MESSAGE(WARNING "\nThe compiler selected to build UHD (${APPLE_STR}Clang version ${CLANG_VERSION} : ${CMAKE_CXX_COMPILER}) is older than that officially supported (${MIN_VERSION} minimum). This build may or not work. We highly recommend using Apple Clang version ${APPLECLANG_MIN_VERSION} or more recent, or Clang version ${CLANG_MIN_VERSION} or more recent.")
-        ENDIF()
-    ELSE()
-        MESSAGE(WARNING "\nCannot determine the version of the compiler selected to build UHD (${APPLE_STR}Clang : ${CMAKE_CXX_COMPILER}). This build may or not work. We highly recommend using Apple Clang version ${APPLECLANG_MIN_VERSION} or more recent, or Clang version ${CLANG_MIN_VERSION} or more recent.")
-    ENDIF()
+# UHD requires C++17. A newer standard may be selected by setting
+# CMAKE_CXX_STANDARD, but an older one is rejected.
+IF(NOT DEFINED CMAKE_CXX_STANDARD)
+    SET(CMAKE_CXX_STANDARD 17)
+ELSEIF(CMAKE_CXX_STANDARD MATCHES "^(98|11|14)$")
+    MESSAGE(FATAL_ERROR "UHD requires C++17 or later, but CMAKE_CXX_STANDARD is ${CMAKE_CXX_STANDARD}.")
 ENDIF()
+SET(CMAKE_CXX_STANDARD_REQUIRED ON)
+SET(CMAKE_CXX_EXTENSIONS OFF)
 
 ########################################################################
 # Packaging Variables
@@ -250,12 +208,13 @@ ENDIF()
 ########################################################################
 MESSAGE(STATUS "")
 MESSAGE(STATUS "Configuring Boost C++ Libraries...")
+# Boost.System has been header-only since Boost 1.69, and current releases
+# no longer install a library for it, so it is not a required component.
 SET(BOOST_REQUIRED_COMPONENTS
     date_time
     filesystem
     program_options
     regex
-    system
     unit_test_framework
     serialization
 )
@@ -278,12 +237,7 @@ IF(MSVC)
     ENDIF(BOOST_ALL_DYN_LINK)
 ENDIF(MSVC)
 
-SET(Boost_ADDITIONAL_VERSIONS
-    "1.46.0" "1.46" "1.47.0" "1.47" "1.48.0" "1.48" "1.48.0" "1.49" "1.50.0" "1.50"
-    "1.51.0" "1.51" "1.52.0" "1.52" "1.53.0" "1.53" "1.54.0" "1.54" "1.55.0" "1.55"
-    "1.56.0" "1.56"
-)
-FIND_PACKAGE(Boost 1.46 COMPONENTS ${BOOST_REQUIRED_COMPONENTS})
+FIND_PACKAGE(Boost 1.71 COMPONENTS ${BOOST_REQUIRED_COMPONENTS})
 
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
@@ -302,21 +256,15 @@ INCLUDE(UHDGlobalDefs)
 ########################################################################
 INCLUDE(UHDPython)
 
-PYTHON_CHECK_MODULE(
-    "Python version 2.6 or greater"
-    "platform" "platform.python_version() >= '2.6'"
-    HAVE_PYTHON_PLAT_MIN_VERSION
-)
-
-PYTHON_CHECK_MODULE(
+PYTHON_CHECK_MODULE_VERSION(
     "Mako templates 0.4.2 or greater"
-    "mako" "mako.__version__ >= '0.4.2'"
+    "mako" "0.4.2"
     HAVE_PYTHON_MODULE_MAKO
 )
 
-PYTHON_CHECK_MODULE(
+PYTHON_CHECK_MODULE_VERSION(
     "requests 2.0 or greater"
-    "requests" "requests.__version__ >= '2.0'"
+    "requests" "2.0"
     HAVE_PYTHON_MODULE_REQUESTS
 )
 
@@ -355,7 +303,7 @@ SET(UHD_IMAGES_DOWNLOAD_SRC "uhd-images_003.009.007-release.zip")
 ########################################################################
 # Register top level components
 ########################################################################
-LIBUHD_REGISTER_COMPONENT("LibUHD" ENABLE_LIBUHD ON "Boost_FOUND;HAVE_PYTHON_PLAT_MIN_VERSION;HAVE_PYTHON_MODULE_MAKO" OFF ON)
+LIBUHD_REGISTER_COMPONENT("LibUHD" ENABLE_LIBUHD ON "Boost_FOUND;Python3_FOUND;HAVE_PYTHON_MODULE_MAKO" OFF ON)
 LIBUHD_REGISTER_COMPONENT("LibUHD - C API" ENABLE_C_API ON "ENABLE_LIBUHD" OFF OFF)
 LIBUHD_REGISTER_COMPONENT("Examples" ENABLE_EXAMPLES ON "ENABLE_LIBUHD" OFF OFF)
 LIBUHD_REGISTER_COMPONENT("Utils" ENABLE_UTILS ON "ENABLE_LIBUHD" OFF OFF)
