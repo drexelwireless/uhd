@@ -256,15 +256,15 @@ INCLUDE(UHDGlobalDefs)
 ########################################################################
 INCLUDE(UHDPython)
 
-PYTHON_CHECK_MODULE(
+PYTHON_CHECK_MODULE_VERSION(
     "Mako templates 0.4.2 or greater"
-    "mako" "mako.__version__ >= '0.4.2'"
+    "mako" "0.4.2"
     HAVE_PYTHON_MODULE_MAKO
 )
 
-PYTHON_CHECK_MODULE(
+PYTHON_CHECK_MODULE_VERSION(
     "requests 2.0 or greater"
-    "requests" "requests.__version__ >= '2.0'"
+    "requests" "2.0"
     HAVE_PYTHON_MODULE_REQUESTS
 )
 

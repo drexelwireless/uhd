@@ -35,33 +35,29 @@ SET(PYTHON_EXECUTABLE ${Python3_EXECUTABLE} CACHE FILEPATH "python interpreter" 
 MESSAGE(STATUS "Python interpreter: ${PYTHON_EXECUTABLE} (${Python3_VERSION})")
 MESSAGE(STATUS "Override with: -DPYTHON_EXECUTABLE=<path-to-python>")
 
-MACRO(PYTHON_CHECK_MODULE desc mod cmd have)
+# PYTHON_CHECK_MODULE_VERSION(desc mod min have) sets have to TRUE when the
+# selected interpreter can import mod and mod.__version__ is at least min.
+# CMake compares the versions component by component as numbers.
+MACRO(PYTHON_CHECK_MODULE_VERSION desc mod min have)
     MESSAGE(STATUS "")
     MESSAGE(STATUS "Python checking for ${desc}")
     EXECUTE_PROCESS(
-        COMMAND ${PYTHON_EXECUTABLE} -c "
-#########################################
-try: import ${mod}
-except: exit(1)
-try: assert ${cmd}
-except: exit(2)
-exit(0)
-#########################################"
-        RESULT_VARIABLE ${have}
+        COMMAND ${PYTHON_EXECUTABLE} -c "import ${mod}; print(${mod}.__version__)"
+        RESULT_VARIABLE _uhd_python_module_result
+        OUTPUT_VARIABLE _uhd_python_module_version
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET
     )
-    IF(${have} EQUAL 0)
-        MESSAGE(STATUS "Python checking for ${desc} - found")
-        SET(${have} TRUE)
-    ELSEIF(${have} EQUAL 1)
-        MESSAGE(STATUS "Python checking for ${desc} - \"import ${mod}\" failed")
+    IF(NOT _uhd_python_module_result EQUAL 0)
+        MESSAGE(STATUS "Python checking for ${desc} - \"import ${mod}\" failed or ${mod}.__version__ is missing")
         SET(${have} FALSE)
-    ELSEIF(${have} EQUAL 2)
-        MESSAGE(STATUS "Python checking for ${desc} - \"assert ${cmd}\" failed")
+    ELSEIF(_uhd_python_module_version VERSION_LESS ${min})
+        MESSAGE(STATUS "Python checking for ${desc} - found ${_uhd_python_module_version}, but ${min} or greater is required")
         SET(${have} FALSE)
     ELSE()
-        MESSAGE(STATUS "Python checking for ${desc} - unknown error")
-        SET(${have} FALSE)
+        MESSAGE(STATUS "Python checking for ${desc} - found ${_uhd_python_module_version}")
+        SET(${have} TRUE)
     ENDIF()
-ENDMACRO(PYTHON_CHECK_MODULE)
+ENDMACRO(PYTHON_CHECK_MODULE_VERSION)
 
 ENDIF(NOT DEFINED INCLUDED_UHD_PYTHON_CMAKE)
