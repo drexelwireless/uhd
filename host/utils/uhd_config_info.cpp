@@ -34,10 +34,12 @@ int UHD_SAFE_MAIN(int argc, char* argv[]) {
         ("cxx-compiler",       "Print C++ compiler")
         ("c-flags",            "Print C compiler flags")
         ("cxx-flags",          "Print C++ compiler flags")
+        ("cxx-standard",       "Print C++ language standard")
         ("enabled-components", "Print built-time enabled components")
         ("install-prefix",     "Print install prefix")
         ("boost-version",      "Print Boost version")
         ("libusb-version",     "Print libusb version")
+        ("libusb-runtime-version", "Print libusb version loaded at run time")
         ("pkg-path",           "Print pkg path")
         ("images-dir",         "Print images dir")
         ("abi-version",        "Print ABI version string")
@@ -76,6 +78,9 @@ int UHD_SAFE_MAIN(int argc, char* argv[]) {
     if(vm.count("cxx-flags") > 0 or print_all) {
         std::cout << "C++ flags: " << uhd::build_info::cxx_flags() << std::endl;
     }
+    if(vm.count("cxx-standard") > 0 or print_all) {
+        std::cout << "C++ standard: " << uhd::build_info::cxx_standard() << std::endl;
+    }
     if(vm.count("enabled-components") > 0 or print_all) {
         std::cout << "Enabled components: " << uhd::build_info::enabled_components() << std::endl;
     }
@@ -88,6 +93,9 @@ int UHD_SAFE_MAIN(int argc, char* argv[]) {
     if(vm.count("libusb-version") > 0 or print_all) {
         std::string _libusb_version = uhd::build_info::libusb_version();
         std::cout << "Libusb version: " << (_libusb_version.empty() ? "N/A" : _libusb_version) << std::endl;
+    }
+    if(vm.count("libusb-runtime-version") > 0 or print_all) {
+        std::cout << "Libusb runtime version: " << uhd::build_info::libusb_runtime_version() << std::endl;
     }
     if(vm.count("pkg-path") > 0 or print_all) {
         std::cout << "Package path: " << uhd::get_pkg_path() << std::endl;

@@ -18,12 +18,13 @@
 #include <config.h>
 
 #include <uhd/build_info.hpp>
+#include "build_info_flags.hpp"
 
 #include <boost/format.hpp>
 #include <boost/version.hpp>
 #include <boost/algorithm/string.hpp>
 
-#ifdef ENABLE_USB
+#if @UHD_BUILD_INFO_HAVE_LIBUSB@
 #include <libusb.h>
 #endif
 
@@ -47,24 +48,16 @@ namespace uhd { namespace build_info {
         return "@UHD_CXX_COMPILER@";
     }
 
-#ifdef _MSC_VER
-    static const std::string define_flag = "/D ";
-#else
-    static const std::string define_flag = "-D";
-#endif
-
     const std::string c_flags() {
-        return boost::algorithm::replace_all_copy(
-            (define_flag + std::string("@UHD_C_FLAGS@")),
-            std::string(";"), (" " + define_flag)
-        );
+        return UHD_BUILD_INFO_C_FLAGS;
     }
 
     const std::string cxx_flags() {
-        return boost::algorithm::replace_all_copy(
-            (define_flag + std::string("@UHD_CXX_FLAGS@")),
-            std::string(";"), (" " + define_flag)
-        );
+        return UHD_BUILD_INFO_CXX_FLAGS;
+    }
+
+    const std::string cxx_standard() {
+        return "@UHD_CXX_STANDARD@";
     }
 
     const std::string enabled_components() {
@@ -79,33 +72,14 @@ namespace uhd { namespace build_info {
     }
 
     const std::string libusb_version() {
-    #ifdef ENABLE_USB
-        /*
-         * Versions can only be queried from 1.0.13 onward.
-         * Depending on if the commit came from libusbx or
-         * libusb (now merged), the define might be different.
-         */
-        #ifdef LIBUSB_API_VERSION /* 1.0.18 onward */
-            int major_version = LIBUSB_API_VERSION >> 24;
-            int minor_version = (LIBUSB_API_VERSION & 0xFF0000) >> 16;
-            int micro_version = ((LIBUSB_API_VERSION & 0xFFFF) - 0x100) + 18;
+        return "@UHD_LIBUSB_VERSION@";
+    }
 
-            return str(boost::format("%d.%d.%d")
-                          % major_version % minor_version % micro_version);
-        #elif defined(LIBUSBX_API_VERSION) /* 1.0.13 - 1.0.17 */
-            switch(LIBUSBX_API_VERSION & 0xFF) {
-                case 0x00:
-                    return "1.0.13";
-                case 0x01:
-                    return "1.0.15";
-                case 0xFF:
-                    return "1.0.14";
-                default:
-                    return "1.0.16 or 1.0.17";
-            }
-        #else
-            return "< 1.0.13";
-        #endif
+    const std::string libusb_runtime_version() {
+    #if @UHD_BUILD_INFO_HAVE_LIBUSB@
+        const struct libusb_version *version = libusb_get_version();
+        return str(boost::format("%d.%d.%d")
+                      % version->major % version->minor % version->micro);
     #else
         return "N/A";
     #endif

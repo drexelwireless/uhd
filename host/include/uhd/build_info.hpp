@@ -36,11 +36,21 @@ namespace uhd { namespace build_info {
     //! Return the C++ compiler used for this build.
     UHD_API const std::string cxx_compiler();
 
-    //! Return the C flags passed into this build.
+    /*!
+     * Return the C compile definitions and flags of this build, including
+     * the flags of its build type.
+     */
     UHD_API const std::string c_flags();
 
-    //! Return the C++ flags passed into this build.
+    /*!
+     * Return the C++ compile definitions and flags of this build, including
+     * the flags of its build type. The language standard is reported
+     * separately by cxx_standard().
+     */
     UHD_API const std::string cxx_flags();
+
+    //! Return the C++ language standard of this build, such as c++17.
+    UHD_API const std::string cxx_standard();
 
     //! Return the UHD components enabled for this build, comma-delimited.
     UHD_API const std::string enabled_components();
@@ -48,8 +58,18 @@ namespace uhd { namespace build_info {
     //! Return the default CMake install prefix for this build.
     UHD_API const std::string install_prefix();
 
-    //! Return the version of libusb this build was built with.
+    /*!
+     * Return the version of libusb this build was configured with, as
+     * reported by pkg-config. Returns "unknown" if pkg-config did not report
+     * it and "N/A" if USB support is disabled.
+     */
     UHD_API const std::string libusb_version();
+
+    /*!
+     * Return the version of the libusb library loaded at run time, or "N/A"
+     * if USB support is disabled.
+     */
+    UHD_API const std::string libusb_runtime_version();
 }}
 
 #endif /* INCLUDED_UHD_BUILD_INFO_HPP */

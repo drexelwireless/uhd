@@ -57,8 +57,56 @@ MACRO(UHD_LOAD_BUILD_INFO)
         SET(UHD_CXX_COMPILER "${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
     ENDIF(MSVC)
 
-    # Compiler flags
-    GET_DIRECTORY_PROPERTY(uhd_flags COMPILE_DEFINITIONS)
-    SET(UHD_C_FLAGS "${uhd_flags}${CMAKE_C_FLAGS}") # CMAKE_C_FLAGS starts with a space
-    SET(UHD_CXX_FLAGS "${uhd_flags}${CMAKE_CXX_FLAGS}") # CMAKE_CXX_FLAGS starts with a space
+    # Compiler flags: the directory's compile definitions, the flags for every
+    # build type, and then the flags of the active build type. The last part
+    # is a generator expression, so lib/CMakeLists.txt writes the flags with
+    # FILE(GENERATE) to evaluate it for each configuration.
+    IF(MSVC)
+        SET(_uhd_define_flag "/D")
+    ELSE()
+        SET(_uhd_define_flag "-D")
+    ENDIF()
+    GET_DIRECTORY_PROPERTY(_uhd_defs COMPILE_DEFINITIONS)
+    SET(_uhd_def_flags "")
+    FOREACH(_uhd_def ${_uhd_defs})
+        STRING(APPEND _uhd_def_flags " ${_uhd_define_flag}${_uhd_def}")
+    ENDFOREACH()
+    FOREACH(_uhd_lang C CXX)
+        SET(_uhd_flags "${_uhd_def_flags} ${CMAKE_${_uhd_lang}_FLAGS}")
+        STRING(REGEX REPLACE "  +" " " _uhd_flags "${_uhd_flags}")
+        STRING(STRIP "${_uhd_flags}" _uhd_flags)
+        FOREACH(_uhd_config DEBUG RELEASE RELWITHDEBINFO MINSIZEREL)
+            SET(_uhd_config_flags "${CMAKE_${_uhd_lang}_FLAGS_${_uhd_config}}")
+            STRING(STRIP "${_uhd_config_flags}" _uhd_config_flags)
+            IF(_uhd_config_flags)
+                STRING(REPLACE ">" "$<ANGLE-R>" _uhd_config_flags "${_uhd_config_flags}")
+                STRING(REPLACE "," "$<COMMA>" _uhd_config_flags "${_uhd_config_flags}")
+                STRING(APPEND _uhd_flags "$<$<CONFIG:${_uhd_config}>: ${_uhd_config_flags}>")
+            ENDIF()
+        ENDFOREACH()
+        # The flags become a C++ string literal.
+        STRING(REPLACE "\\" "\\\\" _uhd_flags "${_uhd_flags}")
+        STRING(REPLACE "\"" "\\\"" _uhd_flags "${_uhd_flags}")
+        SET(UHD_${_uhd_lang}_FLAGS "${_uhd_flags}")
+    ENDFOREACH()
+
+    # C++ language standard
+    IF(CMAKE_CXX_EXTENSIONS)
+        SET(UHD_CXX_STANDARD "gnu++${CMAKE_CXX_STANDARD}")
+    ELSE()
+        SET(UHD_CXX_STANDARD "c++${CMAKE_CXX_STANDARD}")
+    ENDIF()
+
+    # libusb: the version found by pkg-config during configuration
+    IF(ENABLE_USB)
+        SET(UHD_BUILD_INFO_HAVE_LIBUSB 1)
+        IF(PC_LIBUSB_VERSION)
+            SET(UHD_LIBUSB_VERSION "${PC_LIBUSB_VERSION}")
+        ELSE()
+            SET(UHD_LIBUSB_VERSION "unknown")
+        ENDIF()
+    ELSE()
+        SET(UHD_BUILD_INFO_HAVE_LIBUSB 0)
+        SET(UHD_LIBUSB_VERSION "N/A")
+    ENDIF()
 ENDMACRO(UHD_LOAD_BUILD_INFO)
