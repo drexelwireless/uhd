@@ -76,6 +76,33 @@ INCLUDE_SUBDIRECTORY(usrp_clock)
 INCLUDE_SUBDIRECTORY(utils)
 
 ########################################################################
+# Build info
+########################################################################
+INCLUDE(UHDBuildInfo)
+UHD_LOAD_BUILD_INFO()
+CONFIGURE_FILE(
+    ${CMAKE_CURRENT_SOURCE_DIR}/build_info.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/build_info.cpp
+@ONLY)
+# The flags contain generator expressions for the active build type.
+# Generate them into a header for each configuration of a multi-config
+# generator, or a single header otherwise.
+GET_PROPERTY(_uhd_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+IF(_uhd_multi_config)
+    SET(_uhd_build_info_dir ${CMAKE_CURRENT_BINARY_DIR}/build_info/$<CONFIG>)
+ELSE()
+    SET(_uhd_build_info_dir ${CMAKE_CURRENT_BINARY_DIR}/build_info)
+ENDIF()
+FILE(GENERATE
+    OUTPUT ${_uhd_build_info_dir}/build_info_flags.hpp
+    CONTENT "#define UHD_BUILD_INFO_C_FLAGS \"${UHD_C_FLAGS}\"
+#define UHD_BUILD_INFO_CXX_FLAGS \"${UHD_CXX_FLAGS}\"
+"
+)
+SET_PROPERTY(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/build_info.cpp
+    APPEND PROPERTY INCLUDE_DIRECTORIES ${_uhd_build_info_dir})
+
+########################################################################
 # Setup UHD_VERSION_STRING for version.cpp
 ########################################################################
 CONFIGURE_FILE(
@@ -87,6 +114,7 @@ CONFIGURE_FILE(
 # Append to the list of sources for lib uhd
 ########################################################################
 LIBUHD_APPEND_SOURCES(
+    ${CMAKE_CURRENT_BINARY_DIR}/build_info.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/deprecated.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/device.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/image_loader.cpp
