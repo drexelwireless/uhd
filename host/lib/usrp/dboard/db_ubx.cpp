@@ -177,8 +177,8 @@ static const ubx_gpio_field_info_t ubx_proto_gpio_info[] = {
     {TX_LO_LOCKED,  dboard_iface::UNIT_TX,  6,  0x1<<6,     1,  ubx_gpio_field_info_t::OUTPUT, false,  0,  0,  0,  0},
     {RX_LO_LOCKED,  dboard_iface::UNIT_TX,  7,  0x1<<7,     1,  ubx_gpio_field_info_t::OUTPUT, false,  0,  0,  0,  0},
     {CPLD_RST_N,    dboard_iface::UNIT_TX,  9,  0x1<<9,     1,  ubx_gpio_field_info_t::INPUT,  false,  0,  0,  0,  0},
-    {TX_GAIN,       dboard_iface::UNIT_TX,  10, 0x3F<<10,   10, ubx_gpio_field_info_t::INPUT,  false,  0,  0,  0,  0},
-    {RX_GAIN,       dboard_iface::UNIT_RX,  10, 0x3F<<10,   10, ubx_gpio_field_info_t::INPUT,  false,  0,  0,  0,  0}
+    {TX_GAIN,       dboard_iface::UNIT_TX,  10, 0x3F<<10,   6,  ubx_gpio_field_info_t::INPUT,  false,  0,  0,  0,  0},
+    {RX_GAIN,       dboard_iface::UNIT_RX,  10, 0x3F<<10,   6,  ubx_gpio_field_info_t::INPUT,  false,  0,  0,  0,  0}
 };
 
 static const ubx_gpio_field_info_t ubx_v1_gpio_info[] = {
@@ -190,12 +190,12 @@ static const ubx_gpio_field_info_t ubx_v1_gpio_info[] = {
     {RX_EN_N,       dboard_iface::UNIT_TX,   6,  0x1<<6,     1,  ubx_gpio_field_info_t::INPUT,  true,   1,  1,  0,  0},
     {TXLO1_SYNC,    dboard_iface::UNIT_TX,   7,  0x1<<7,     1,  ubx_gpio_field_info_t::INPUT,  true,   0,  0,  0,  0},
     {TXLO2_SYNC,    dboard_iface::UNIT_TX,   9,  0x1<<9,     1,  ubx_gpio_field_info_t::INPUT,  true,   0,  0,  0,  0},
-    {TX_GAIN,       dboard_iface::UNIT_TX,   10, 0x3F<<10,   10, ubx_gpio_field_info_t::INPUT,  false,  0,  0,  0,  0},
+    {TX_GAIN,       dboard_iface::UNIT_TX,   10, 0x3F<<10,   6,  ubx_gpio_field_info_t::INPUT,  false,  0,  0,  0,  0},
     {RX_LO_LOCKED,  dboard_iface::UNIT_RX,   0,  0x1,        1,  ubx_gpio_field_info_t::OUTPUT, false,  0,  0,  0,  0},
     {TX_LO_LOCKED,  dboard_iface::UNIT_RX,   1,  0x1<<1,     1,  ubx_gpio_field_info_t::OUTPUT, false,  0,  0,  0,  0},
     {RXLO1_SYNC,    dboard_iface::UNIT_RX,   5,  0x1<<5,     1,  ubx_gpio_field_info_t::INPUT,  true,   0,  0,  0,  0},
     {RXLO2_SYNC,    dboard_iface::UNIT_RX,   7,  0x1<<7,     1,  ubx_gpio_field_info_t::INPUT,  true,   0,  0,  0,  0},
-    {RX_GAIN,       dboard_iface::UNIT_RX,   10, 0x3F<<10,   10, ubx_gpio_field_info_t::INPUT,  false,  0,  0,  0,  0}
+    {RX_GAIN,       dboard_iface::UNIT_RX,   10, 0x3F<<10,   6,  ubx_gpio_field_info_t::INPUT,  false,  0,  0,  0,  0}
 };
 
 /***********************************************************************
