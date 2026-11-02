@@ -36,7 +36,7 @@ const std::string _eth_file("eths_info.txt");
 static std::string uhd_error_msgs;
 static void screen_handler(uhd::msg::type_t type, const std::string& msg)
 {
-    printw( msg.c_str() );
+    printw("%s", msg.c_str());
     //printw("\n");
     refresh();
     if(type == uhd::msg::error){
@@ -89,7 +89,7 @@ Responder::register_stop_signal_handler()
 void
 Responder::FLUSH_SCREEN()
 {
-    printw(_ss.str().c_str());
+    printw("%s", _ss.str().c_str());
     refresh();
     _ss.str("");
 }
